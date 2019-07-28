@@ -23,9 +23,11 @@ namespace vidga {
         virtual void setCenter(coors c) = 0;
         virtual void setWidth(unsigned int newWidth) = 0;
         virtual void setHeight(unsigned int newHeight) = 0;
+
     private:
         coors center;
         unsigned int width, height;
     };
+
 }
 #endif //VIDGA_SHAPE_H
