@@ -12,7 +12,6 @@ namespace vidga {
         unsigned int y;
     } coors;
 
-    template <class T>
     class shape {
     public:
         // Getters
