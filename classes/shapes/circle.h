@@ -8,7 +8,7 @@
 #include "../../interfaces/shape/shape.h"
 
 namespace vidga {
-    class circle : shape {
+    class circle : public shape {
     public:
         circle(coors center_, ucoor_t radius_);
         explicit circle(ucoor_t radius_);

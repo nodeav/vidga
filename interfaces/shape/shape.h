@@ -7,9 +7,9 @@
 
 #include <cmath>
 #include <ostream>
+#include "opencv2/core/types.hpp"
 
 namespace vidga {
-
     typedef unsigned int ucoor_t;
     typedef int coor_t;
 
@@ -32,6 +32,11 @@ namespace vidga {
 
             return std::sqrtf(xDiffSquared + yDiffSquared);
         };
+
+        explicit operator cv::Point() const {
+            return {static_cast<int>(x), static_cast<int>(y)};
+        }
+
     } coors;
 
     class shape {
