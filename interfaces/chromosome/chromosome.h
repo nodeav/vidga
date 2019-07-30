@@ -5,17 +5,15 @@
 #ifndef VIDGA_CHROMOSOME_H
 #define VIDGA_CHROMOSOME_H
 
-#include <array>
-#include "../shapes/shape.h"
+#include <vector>
+#include "../shape/shape.h"
 
 namespace vidga {
 
     class chromosome {
     public:
-        // Move ctor
-        virtual chromosome(std::vector<shape>&& shapes) = 0;
-        auto getChromosomes() const = 0;
-        auto getMutChromosomes() = 0;
+        virtual std::vector<shape> getShapes() const = 0;
+        virtual std::vector<shape> getShapesMut() = 0;
 
     private:
         std::vector<shape> shapes;

@@ -7,8 +7,8 @@ add_executable(Vidga
         main.cpp
         interfaces/ga/ga.cpp
         interfaces/ga/ga.h
-        interfaces/shapes/shape.cpp
-        interfaces/shapes/shape.h
+        interfaces/shape/shape.cpp
+        interfaces/shape/shape.h
         interfaces/chromosome/chromosome.cpp
         interfaces/chromosome/chromosome.h
-        )
+        classes/shapes/circle.cpp classes/shapes/circle.h)
