@@ -27,15 +27,11 @@ namespace vidga {
     }
 
     circle::circle(coors center_, ucoor_t radius_)
-        : radius(radius_)
-    {
-        // TODO: use delegated constructor (values overridden somehow?)
-        setCenter(center_);
+        : shape(center_)
+        , radius(radius_) {
     }
 
-    circle::circle(ucoor_t radius_)
-        : radius(radius_)
-    {
+    circle::circle(ucoor_t radius_) : circle({0, 0}, radius_) {
         std::cout << "radius is " << radius << " and coors are {" << center.x << ", " << center.y << "}" << std::endl;
 
     }

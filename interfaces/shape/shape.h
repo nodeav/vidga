@@ -41,8 +41,8 @@ namespace vidga {
 
     class shape {
     public:
+        explicit shape(coors center_);
         virtual bool contains(coors c) const = 0;
-
         // Getters
         coors getCenter() const;
         virtual ucoor_t getWidth() const = 0;

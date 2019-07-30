@@ -11,4 +11,8 @@ namespace vidga {
     coors shape::getCenter() const {
         return center;
     }
+
+    shape::shape(coors center_) : center(center_) {
+
+    }
 }
