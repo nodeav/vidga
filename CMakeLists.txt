@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(Vidga)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 set(CMAKE_CXX_STANDARD 14)
 set(PROJECT_NAME Vidga)
-
-find_package(OpenCV REQUIRED)
 
 add_executable(${PROJECT_NAME}
         main.cpp
@@ -17,4 +17,4 @@ add_executable(${PROJECT_NAME}
         classes/shapes/circle.cpp classes/shapes/circle.h
         )
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} CONAN_PKG::opencv)
