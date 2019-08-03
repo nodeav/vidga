@@ -66,6 +66,7 @@ namespace vidga {
         void setCenter(coors c);
         virtual void setWidth(ucoor_t newWidth) = 0;
         virtual void setHeight(ucoor_t newHeight) = 0;
+        virtual void setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) = 0;
 
     private:
         coors center;

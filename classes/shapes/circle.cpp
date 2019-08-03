@@ -35,4 +35,9 @@ namespace vidga {
         std::cout << "radius is " << radius << " and coors are {" << center.x << ", " << center.y << "}" << std::endl;
 
     }
+
+    void circle::setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
+        center = coors::generateRandom(xMax, yMax);
+        radius = static_cast<ucoor_t>(genRandom(sideLengthMin, sideLengthMax));
+    }
 }

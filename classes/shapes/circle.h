@@ -19,7 +19,7 @@ namespace vidga {
 
         void setWidth(ucoor_t newWidth) override;
         void setHeight(ucoor_t newHeight) override;
-
+        void setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) override;
     private:
         coors center;
         ucoor_t radius;
