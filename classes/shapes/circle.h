@@ -10,6 +10,7 @@
 namespace vidga {
     class circle : public shape {
     public:
+        circle();
         circle(coors center_, ucoor_t radius_);
         explicit circle(ucoor_t radius_);
 

@@ -40,4 +40,8 @@ namespace vidga {
         center = coors::generateRandom(xMax, yMax);
         radius = static_cast<ucoor_t>(genRandom(sideLengthMin, sideLengthMax));
     }
+
+    circle::circle() : circle({0, 0}, 0) {
+
+    }
 }
