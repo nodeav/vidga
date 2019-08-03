@@ -17,6 +17,7 @@ namespace vidga {
         bool contains(coors c) const override;
         ucoor_t getWidth() const override;
         ucoor_t getHeight() const override;
+        coors getCenter() const override;
 
         void setWidth(ucoor_t newWidth) override;
         void setHeight(ucoor_t newHeight) override;

@@ -15,6 +15,6 @@ add_executable(${PROJECT_NAME}
         interfaces/chromosome/chromosome.cpp
         interfaces/chromosome/chromosome.h
         classes/shapes/circle.cpp classes/shapes/circle.h
-        )
+        classes/chromosomes/simpleChromosome.cpp classes/chromosomes/simpleChromosome.h)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})

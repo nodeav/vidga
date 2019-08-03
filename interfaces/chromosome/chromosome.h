@@ -12,11 +12,11 @@ namespace vidga {
 
     class chromosome {
     public:
-        virtual std::vector<shape> getShapes() const = 0;
-        virtual std::vector<shape> getShapesMut() = 0;
+//        virtual std::vector<shape> getShapes() const = 0;
+//        virtual std::vector<shape> getShapesMut() = 0;
 
     private:
-        std::vector<shape> shapes;
+        std::vector<std::unique_ptr<shape>> shapes;
     };
 
 }

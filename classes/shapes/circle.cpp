@@ -44,4 +44,8 @@ namespace vidga {
     circle::circle() : circle({0, 0}, 0) {
 
     }
+
+    coors circle::getCenter() const {
+        return center;
+    }
 }
