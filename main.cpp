@@ -19,13 +19,13 @@ int main() {
 
     const auto avgCircleSize = (avgRadius * avgRadius * 3.14159265);
     const auto circleAmountFactor = 2.5;
-    auto numCircles = 5;//static_cast<size_t >(circleAmountFactor * xRes * yRes / avgCircleSize);
+    auto numCircles = static_cast<size_t >(circleAmountFactor * xRes * yRes / avgCircleSize);
 
     std::vector<simpleChromosome> chromosomes;
     chromosomes.reserve(3);
 
     for (auto i = 0; i < 3; i++) {
-        auto canvas = cv::Mat(yRes, xRes, CV_8UC3);
+        auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(0, 0, 0));
         std::string winName = "debug" + std::to_string(i);
         std::cout << "using winName " << winName << std::endl;
         cv::namedWindow(winName);
@@ -36,7 +36,7 @@ int main() {
             chromosomes[0].mutRandMerge(chromosomes[1]);
         }
         std::cout << "Going to draw a " << chromosomes[i%2].getShapes().size() << "-long vector of shapes" << std::endl;
-        canvas = cv::Scalar(255, 255, 255);
+        // Weird things happen without this line
         chromosomes[i%2].draw(canvas, winName);
         cv::imshow(winName, canvas);
         canvas.release();

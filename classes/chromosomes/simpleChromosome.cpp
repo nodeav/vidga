@@ -31,9 +31,8 @@ namespace vidga {
             return cv::Scalar(getColor(), getColor(), getColor());
         };
 
-        auto i = 0;
-        for (auto const& circle : shapes) {
-            std::cout << "drawing circle #" << i++ << std::endl;
+        for (auto const &circle : shapes) {
+            std::cout << "center, radius: " << circle->getCenter() << ", " << circle->getWidth() << std::endl;
             const auto pt = cv::Point(circle->getCenter());
             cv::circle(canvas, pt, circle->getWidth(), getColorScalar(), -1);
         }
@@ -51,6 +50,7 @@ namespace vidga {
         auto& dstShapes = getShapesMut();
         auto& srcShapes = src.getShapesMut();
         dstShapes.reserve(src.getShapes().size());
+
         // We only need 1 bit of randomness per decision
         const auto bitsPerInt = sizeof(int) * 8;
         const auto intsOfRandomness = static_cast<int>(dstShapes.size() / bitsPerInt + 1);
@@ -61,13 +61,8 @@ namespace vidga {
         for (auto i = 0; i < intsOfRandomness; i++) {
             auto oneInt = genRandomInt();
             for (auto j = 0; j < bitsPerInt && (i+j) < dstShapes.size(); j++) {
-                std::cout << "Using i+j == " << i+j << std::endl;
-                std::cout << "\tbit #" << i+j << " is " << getBit(oneInt, j) << std::endl;
                 if (getBit(oneInt, j)) {
                     dstShapes[i+j] = std::move(srcShapes[i+j]);
-                    if (srcShapes[i+j] == nullptr) {
-                        std::cout << "nullptr it is!" << std::endl;
-                    }
                 }
             }
         }
