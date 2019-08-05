@@ -14,12 +14,20 @@ namespace vidga {
         return radius;
     }
 
+    bgr_color_t circle::getColor() const {
+        return color;
+    }
+
     void circle::setHeight(ucoor_t newHeight) {
         radius = newHeight;
     }
 
     void circle::setWidth(ucoor_t newWidth) {
         radius = newWidth;
+    }
+
+    void circle::setColor(vidga::bgr_color_t newColor) {
+        color = newColor;
     }
 
     bool circle::contains(coors c) const {
@@ -39,6 +47,11 @@ namespace vidga {
     void circle::setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
         center = coors::generateRandom(xMax, yMax);
         radius = static_cast<ucoor_t>(genRandom(sideLengthMin, sideLengthMax));
+        color = {
+                static_cast<uint8_t>(genRandom(0, 255)),
+                static_cast<uint8_t>(genRandom(0, 255)),
+                static_cast<uint8_t>(genRandom(0, 255))
+        };
     }
 
     circle::circle() : circle({0, 0}, 0) {

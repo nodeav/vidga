@@ -18,13 +18,17 @@ namespace vidga {
         ucoor_t getWidth() const override;
         ucoor_t getHeight() const override;
         coors getCenter() const override;
+        bgr_color_t getColor() const override;
 
         void setWidth(ucoor_t newWidth) override;
         void setHeight(ucoor_t newHeight) override;
+        void setColor(bgr_color_t newColor) override;
         void setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) override;
+
     private:
         coors center;
         ucoor_t radius;
+        bgr_color_t color;
     };
 }
 

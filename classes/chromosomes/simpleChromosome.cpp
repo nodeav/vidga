@@ -38,7 +38,7 @@ namespace vidga {
                 continue;
             }
             const auto pt = cv::Point(circle->getCenter());
-            cv::circle(canvas, pt, circle->getWidth(), getColorScalar(), -1);
+            cv::circle(canvas, pt, circle->getWidth(), cv::Scalar(circle->getColor()), -1);
         }
     }
 

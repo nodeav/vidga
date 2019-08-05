@@ -20,6 +20,14 @@ namespace vidga {
         return std::uniform_int_distribution<int>(from, to)(numberGenerator);
     }
 
+    typedef struct bgr_color_t {
+        uint8_t r, g, b;
+        explicit operator cv::Scalar() const {
+            return cv::Scalar(b, g, r);
+        }
+    } bgr_color_t;
+
+
     typedef struct coors {
         ucoor_t x;
         ucoor_t y;
@@ -61,16 +69,19 @@ namespace vidga {
         virtual coors getCenter() const;
         virtual ucoor_t getWidth() const = 0;
         virtual ucoor_t getHeight() const = 0;
+        virtual bgr_color_t getColor() const = 0;
 
         // Setters
         void setCenter(coors c);
         virtual void setWidth(ucoor_t newWidth) = 0;
         virtual void setHeight(ucoor_t newHeight) = 0;
+        virtual void setColor(bgr_color_t newColor) = 0;
         virtual void setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) = 0;
 
     private:
         coors center;
         ucoor_t width, height;
+        bgr_color_t color;
     };
 
 }
