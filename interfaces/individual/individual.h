@@ -10,7 +10,7 @@
 
 namespace vidga {
 
-    class chromosome {
+    class individual {
     public:
         virtual const std::vector<std::unique_ptr<shape>>& getShapes() const = 0;
         virtual std::vector<std::unique_ptr<shape>>& getShapesMut() = 0;

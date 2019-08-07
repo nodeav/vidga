@@ -15,17 +15,17 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 
-#include "../../interfaces/chromosome/chromosome.h"
+#include "../../interfaces/chromosome/individual.h"
 #include "../shapes/circle.h"
 
 namespace vidga {
-    class simpleChromosome : chromosome {
+    class simpleIndividual : individual {
     public:
-        simpleChromosome(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
+        simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
         const std::vector<std::unique_ptr<shape>>& getShapes() const override;
         std::vector<std::unique_ptr<shape>>& getShapesMut() override;
         void draw(cv::Mat& canvas, std::string& windowName) const;
-        void mutRandMerge(simpleChromosome &src);
+        void mutRandMerge(simpleIndividual &src);
     private:
         std::vector<std::unique_ptr<shape>> shapes;
 

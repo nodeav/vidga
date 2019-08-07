@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "classes/shapes/circle.h"
-#include "classes/chromosomes/simpleChromosome.h"
+#include "classes/chromosomes/simpleIndividual.h"
 
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgproc.hpp"
@@ -21,12 +21,12 @@ int main() {
     const auto circleAmountFactor = 2.5;
     auto numCircles = static_cast<size_t >(circleAmountFactor * xRes * yRes / avgCircleSize);
 
-    std::vector<simpleChromosome> chromosomes;
+    std::vector<simpleIndividual> chromosomes;
     chromosomes.reserve(3);
 
     for (auto i = 0; i < 3; i++) {
         auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(0, 0, 0));
-        std::string winName = "chromosome #" + std::to_string(i);
+        std::string winName = "individual #" + std::to_string(i);
         std::cout << "using winName " << winName << std::endl;
 
         if (i < 2) {

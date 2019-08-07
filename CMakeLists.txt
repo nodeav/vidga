@@ -12,9 +12,9 @@ add_executable(${PROJECT_NAME}
         interfaces/ga/ga.h
         interfaces/shape/shape.cpp
         interfaces/shape/shape.h
-        interfaces/chromosome/chromosome.cpp
-        interfaces/chromosome/chromosome.h
+        interfaces/individual/individual.cpp
+        interfaces/individual/individual.h
         classes/shapes/circle.cpp classes/shapes/circle.h
-        classes/chromosomes/simpleChromosome.cpp classes/chromosomes/simpleChromosome.h)
+        classes/individual/simpleIndividual.cpp classes/individual/simpleIndividual.h classes/population/simplePopulation.cpp classes/population/simplePopulation.h)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})

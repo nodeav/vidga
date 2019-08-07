@@ -1,18 +1,18 @@
 //
 // Created by Nadav Eidelstein on 03/08/2019.
 //
-#include "simpleChromosome.h"
+#include "simpleIndividual.h"
 
 namespace vidga {
-    std::vector<std::unique_ptr<shape>>& simpleChromosome::getShapesMut() {
+    std::vector<std::unique_ptr<shape>>& simpleIndividual::getShapesMut() {
         return shapes;
     }
 
-    const std::vector<std::unique_ptr<shape>>& simpleChromosome::getShapes() const {
+    const std::vector<std::unique_ptr<shape>>& simpleIndividual::getShapes() const {
         return shapes;
     }
 
-    simpleChromosome::simpleChromosome(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax,
+    simpleIndividual::simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax,
                                        ucoor_t xMax, ucoor_t yMax) {
         shapes.reserve(size);
         for (auto i = 0; i < size; i++) {
@@ -22,7 +22,7 @@ namespace vidga {
         }
     }
 
-    void simpleChromosome::draw(cv::Mat &canvas, std::string &windowName) const {
+    void simpleIndividual::draw(cv::Mat &canvas, std::string &windowName) const {
         const auto getColor = []() {
             return genRandom(0, 255);
         };
@@ -50,7 +50,7 @@ namespace vidga {
         return genRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     }
 
-    void simpleChromosome::mutRandMerge(simpleChromosome &src) {
+    void simpleIndividual::mutRandMerge(simpleIndividual &src) {
         auto& dstShapes = getShapesMut();
         auto& srcShapes = src.getShapesMut();
         dstShapes.reserve(src.getShapes().size());
