@@ -15,7 +15,7 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 
-#include "../../interfaces/chromosome/individual.h"
+#include "../../interfaces/individual/individual.h"
 #include "../shapes/circle.h"
 
 namespace vidga {
