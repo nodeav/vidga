@@ -4,9 +4,11 @@
 
 #include "simplePopulation.h"
 
-vidga::simplePopulation::simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor) {
-    const auto minRadius = static_cast<ucoor_t>((3.0/100) * xRes);
-    const auto maxRadius = static_cast<ucoor_t>((10.0/100) * xRes);
+vidga::simplePopulation::simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor,
+        float minSizeFactor, float maxSizeFactor) {
+
+    const auto minRadius = static_cast<ucoor_t>(minSizeFactor * xRes);
+    const auto maxRadius = static_cast<ucoor_t>(maxSizeFactor * xRes);
     const float avgRadius = static_cast<ucoor_t>((minRadius + maxRadius) / 2);
 
     const auto avgCircleSize = (avgRadius * avgRadius * M_PI);
