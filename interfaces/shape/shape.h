@@ -65,6 +65,8 @@ namespace vidga {
     public:
         explicit shape(coors center_);
         virtual bool contains(coors c) const = 0;
+        virtual void mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMax) = 0;
+
         // Getters
         virtual coors getCenter() const;
         virtual ucoor_t getWidth() const = 0;

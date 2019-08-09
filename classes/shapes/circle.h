@@ -13,6 +13,7 @@ namespace vidga {
         circle();
         circle(coors center_, ucoor_t radius_);
         explicit circle(ucoor_t radius_);
+        void mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMax) override;
 
         bool contains(coors c) const override;
         ucoor_t getWidth() const override;

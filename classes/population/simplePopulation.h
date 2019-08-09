@@ -17,6 +17,7 @@ namespace vidga {
 
         const std::vector<std::unique_ptr<simpleIndividual>> &getIndividuals() const;
 
+
     private:
         std::vector<std::unique_ptr<simpleIndividual>> individuals;
     };

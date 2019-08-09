@@ -61,4 +61,32 @@ namespace vidga {
     coors circle::getCenter() const {
         return center;
     }
+
+    void circle::mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMax) {
+
+        const auto getNumberWithinRange = [](auto var, auto from, auto to) {
+            return std::max(from, std::min(var, to));
+        };
+        auto finalChance = static_cast<int>(100 / getNumberWithinRange(chance, 0.f, 100.f));
+
+
+        const auto mutateVar = [=](auto& var, auto maxValue) {
+            auto shouldMutate = genRandom(0, finalChance) == 1;
+            if (shouldMutate) {
+                const auto max = maxValue / 2;
+                const auto min = -1 * max;
+                var += genRandom(min, max);
+                var = getNumberWithinRange(static_cast<int>(var), 0, static_cast<int>(maxValue));
+                var = var % maxValue;
+                var = var < 0 ? 0 : var;
+            }
+        };
+
+        mutateVar(radius, sizeMax);
+        mutateVar(center.x, xMax);
+        mutateVar(center.y, yMax);
+        mutateVar(color.r, 255);
+        mutateVar(color.g, 255);
+        mutateVar(color.b, 255);
+    }
 }
