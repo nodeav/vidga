@@ -13,44 +13,38 @@
 using namespace vidga;
 
 int main() {
-    ucoor_t xRes = 480, yRes = 270;
-
-    const auto target = simplePopulation(1, xRes, yRes, 2.5);
+    // Load and display target image
+    auto img = cv::imread("/Users/Bunk/Downloads/GA/mona.png");
+    auto xRes = img.cols;
+    auto yRes = img.rows;
     auto targetCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
     const std::string targetWinName = "<= TARGET =>";
-    target.getIndividuals()[0]->draw(targetCanvas);
     cv::namedWindow(targetWinName);
-    cv::imshow(targetWinName, targetCanvas);
+    cv::imshow(targetWinName, img);
 
-    auto population = simplePopulation(100, xRes, yRes, 2.5);
+    // Create initial population
+    auto population = std::make_shared<simplePopulation>(20, xRes, yRes, 2.5);
 
-    auto i = 0;
-    auto scratchCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
-    auto scratchCanvas2 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
-    population.sortByScore(targetCanvas);
-    std::string bestWindow = "bestIndividual";
-    std::string worstWindow = "worstIndividual";
-    cv::namedWindow(bestWindow);
-    cv::namedWindow(worstWindow);
-    auto&& best = population.getIndividuals().front();
-    std::cout << "best score is " << best->getScore() << std::endl;
+    const std::string firstItrWinName = "first iter";
+    cv::namedWindow(firstItrWinName);
+    auto canvas1 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
+    population->getIndividuals()[0]->draw(canvas1);
+    cv::imshow(firstItrWinName, canvas1);
 
-    auto&& worst = population.getIndividuals().back();
-    std::cout << "worst score is " << worst->getScore() << std::endl;
+    for (auto i = 0; i < 4000; i++) {
+        population->sortByScore(targetCanvas);
+        std::cout << "score is: " << population->getIndividuals()[0]->getScore() << std::endl;
+        population = population->nextGeneration();
+    }
 
-    auto font = cv::FONT_HERSHEY_SIMPLEX;
+    const std::string afterIterWinName = "after iters";
+    cv::namedWindow(firstItrWinName);
+    auto canvas2 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
+    population->getIndividuals()[0]->draw(canvas2);
+    cv::imshow(afterIterWinName, canvas2);
 
-    std::cout << "going to draw 'best'..." << std::endl;
-    best->draw(scratchCanvas);
-    cv::putText(scratchCanvas, "Score: " + std::to_string(best->getScore()), {100, 100}, font, 1, {0, 0, 0}, 3, cv::LINE_AA);
-    cv::imshow(bestWindow, scratchCanvas);
-    std::cout << "drew 'best'!" << std::endl;
 
-    std::cout << "going to draw 'worst'..." << std::endl;
-    worst->draw(scratchCanvas2);
-    cv::putText(scratchCanvas2, "Score: " + std::to_string(worst->getScore()), {100, 100}, font, 1, {0, 0, 0}, 3, cv::LINE_AA);
-    cv::imshow(worstWindow, scratchCanvas2);
-    std::cout << "drew 'worst'!" << std::endl;
+
 
     cv::waitKey();
 

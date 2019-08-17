@@ -12,14 +12,20 @@
 namespace vidga {
     class simplePopulation {
     public:
-        simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor,
+        simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor = 2.5,
                          float minSizeFactor=0.03, float maxSizeFactor=0.1);
 
-        const std::vector<std::unique_ptr<simpleIndividual>>& getIndividuals() const;
+
+        const std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
         const void sortByScore(cv::Mat &target);
+        std::shared_ptr<simplePopulation> nextGeneration();
 
     private:
-        std::vector<std::unique_ptr<simpleIndividual>> individuals;
+        std::vector<std::shared_ptr<simpleIndividual>> individuals;
+        uint32_t imgResX, imgResY;
+        ucoor_t minSideLen, maxSideLen;
+
+        void addIndividual(std::shared_ptr<simpleIndividual> shared_ptr);
     };
 }
 

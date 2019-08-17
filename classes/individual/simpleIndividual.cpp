@@ -4,11 +4,11 @@
 #include "simpleIndividual.h"
 
 namespace vidga {
-    std::vector<std::unique_ptr<shape>> &simpleIndividual::getShapesMut() {
+    std::vector<std::shared_ptr<shape>> &simpleIndividual::getShapesMut() {
         return shapes;
     }
 
-    const std::vector<std::unique_ptr<shape>> &simpleIndividual::getShapes() const {
+    const std::vector<std::shared_ptr<shape>> &simpleIndividual::getShapes() const {
         return shapes;
     }
 
@@ -16,9 +16,9 @@ namespace vidga {
                                        ucoor_t xMax, ucoor_t yMax) {
         shapes.reserve(size);
         for (auto i = 0; i < size; i++) {
-            auto c = std::make_unique<circle>();
+            auto c = std::make_shared<circle>();
             c->setRandom(sideLengthMin, sideLengthMax, xMax, yMax);
-            shapes.push_back(std::move(c));
+            shapes.push_back(c);
         }
     }
 
@@ -42,10 +42,13 @@ namespace vidga {
         return genRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     }
 
-    void simpleIndividual::mutRandMerge(simpleIndividual &src) {
-        auto &dstShapes = getShapesMut();
-        auto &srcShapes = src.getShapesMut();
-        dstShapes.reserve(src.getShapes().size());
+    std::shared_ptr<simpleIndividual> simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
+                                                   ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
+        auto dst = std::make_shared<simpleIndividual>(shapes.size(), sideLengthMin, sideLengthMax, xMax, yMax);
+        auto& dstShapes = dst->getShapesMut();
+
+        auto& srcShapes = src->getShapesMut();
+        dstShapes.reserve(src->getShapes().size());
 
         // We only need 1 bit of randomness per decision
         const auto bitsPerInt = sizeof(int) * 8;
@@ -59,11 +62,13 @@ namespace vidga {
             auto idx = i * bitsPerInt;
             for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
                 if (getBit(oneInt, j)) {
-                    dstShapes[idx] = std::move(srcShapes[idx]);
+                    dstShapes[idx] = srcShapes[idx];
+                } else {
+                    dstShapes[idx] = shapes[idx];
                 }
             }
         }
-//        srcShapes.clear();
+        return dst;
     }
 
     void simpleIndividual::calcAndSetScore(cv::Mat& target, cv::Mat& canvas) {
@@ -84,6 +89,10 @@ namespace vidga {
             }
         }
         score = static_cast<float>(newScore / (canvas.total() * canvas.channels()));
+
+        if (score == 0) {
+            std::cout << "score is 0 mofo" << std::endl;
+        }
 //        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 //        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
     }
