@@ -15,6 +15,6 @@ add_executable(${PROJECT_NAME}
         interfaces/individual/individual.cpp
         interfaces/individual/individual.h
         classes/shapes/circle.cpp classes/shapes/circle.h
-        classes/individual/simpleIndividual.cpp classes/individual/simpleIndividual.h classes/population/simplePopulation.cpp classes/population/simplePopulation.h)
+        classes/individual/simpleIndividual.cpp classes/individual/simpleIndividual.h classes/population/simplePopulation.cpp classes/population/simplePopulation.h classes/renderers/opencvRenderer.cpp classes/renderers/opencvRenderer.h)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
