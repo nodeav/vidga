@@ -4,11 +4,11 @@
 #include "simpleIndividual.h"
 
 namespace vidga {
-    std::vector<std::unique_ptr<shape>>& simpleIndividual::getShapesMut() {
+    std::vector<std::unique_ptr<shape>> &simpleIndividual::getShapesMut() {
         return shapes;
     }
 
-    const std::vector<std::unique_ptr<shape>>& simpleIndividual::getShapes() const {
+    const std::vector<std::unique_ptr<shape>> &simpleIndividual::getShapes() const {
         return shapes;
     }
 
@@ -22,15 +22,7 @@ namespace vidga {
         }
     }
 
-    void simpleIndividual::draw(cv::Mat &canvas, std::string &windowName) const {
-        const auto getColor = []() {
-            return genRandom(0, 255);
-        };
-
-        const auto getColorScalar = [=]() {
-            return cv::Scalar(getColor(), getColor(), getColor());
-        };
-
+    void simpleIndividual::draw(cv::Mat &canvas) const {
         int i = 0;
         for (auto const &circle : shapes) {
             if (circle == nullptr) {
@@ -51,8 +43,8 @@ namespace vidga {
     }
 
     void simpleIndividual::mutRandMerge(simpleIndividual &src) {
-        auto& dstShapes = getShapesMut();
-        auto& srcShapes = src.getShapesMut();
+        auto &dstShapes = getShapesMut();
+        auto &srcShapes = src.getShapesMut();
         dstShapes.reserve(src.getShapes().size());
 
         // We only need 1 bit of randomness per decision
@@ -72,5 +64,31 @@ namespace vidga {
             }
         }
 //        srcShapes.clear();
+    }
+
+    void simpleIndividual::calcAndSetScore(cv::Mat& target, cv::Mat& canvas) {
+        draw(canvas);
+        typedef cv::Point3_<uint8_t> Pixel;
+        double newScore = 0;
+//        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        for (int r = 0; r < target.rows; ++r) {
+            Pixel* targetPtr = target.ptr<Pixel>(r, 0);
+            Pixel* canvasPtr = canvas.ptr<Pixel>(r, 0);
+            const Pixel* ptr_end = targetPtr + target.cols;
+            while (targetPtr != ptr_end) {
+                ++targetPtr;
+                ++canvasPtr;
+                newScore += abs(targetPtr->x - canvasPtr->x);
+                newScore += abs(targetPtr->y - canvasPtr->y);
+                newScore += abs(targetPtr->z - canvasPtr->z);
+            }
+        }
+        score = static_cast<float>(newScore / (canvas.total() * canvas.channels()));
+//        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+//        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+    }
+
+    float simpleIndividual::getScore() const {
+        return score;
     }
 }

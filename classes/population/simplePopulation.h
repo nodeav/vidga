@@ -15,8 +15,8 @@ namespace vidga {
         simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor,
                          float minSizeFactor=0.03, float maxSizeFactor=0.1);
 
-        const std::vector<std::unique_ptr<simpleIndividual>> &getIndividuals() const;
-
+        const std::vector<std::unique_ptr<simpleIndividual>>& getIndividuals() const;
+        const void sortByScore(cv::Mat &target);
 
     private:
         std::vector<std::unique_ptr<simpleIndividual>> individuals;
