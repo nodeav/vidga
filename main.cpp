@@ -54,7 +54,7 @@ int main() {
     cv::namedWindow(targetWinName);
     cv::imshow(targetWinName, targetCanvas);
 
-    auto population = simplePopulation(30000, xRes, yRes, 2.5);
+    auto population = simplePopulation(100, xRes, yRes, 2.5);
 
     auto i = 0;
     auto scratchCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
