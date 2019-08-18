@@ -31,7 +31,7 @@ namespace vidga {
 
     const void simplePopulation::sortByScore(cv::Mat &target) {
         cv::Mat canvas(target.rows, target.cols, target.type());
-        for (auto individual : individuals) {
+        for (const auto &individual : individuals) {
             canvas = cv::Scalar({255, 255, 255});
             individual->calcAndSetScore(target, canvas);
         }
@@ -58,7 +58,7 @@ namespace vidga {
         return result;
     }
 
-    void simplePopulation::addIndividual(std::shared_ptr<simpleIndividual> shared_ptr) {
-        individuals.push_back(shared_ptr);
+    void simplePopulation::addIndividual(std::shared_ptr<simpleIndividual> individual) {
+        individuals.push_back(individual);
     }
 }

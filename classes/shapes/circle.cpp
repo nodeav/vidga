@@ -44,7 +44,7 @@ namespace vidga {
 
     }
 
-    void circle::setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
+    void circle::setRandomEverything(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
         center = coors::generateRandom(xMax, yMax);
         radius = static_cast<ucoor_t>(genRandom(sideLengthMin, sideLengthMax));
         color = {
@@ -62,31 +62,33 @@ namespace vidga {
         return center;
     }
 
-    void circle::mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMax) {
+    void circle::mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMin, ucoor_t sizeMax) {
+
+        if (!chance) {
+            return;
+        }
 
         const auto getNumberWithinRange = [](auto var, auto from, auto to) {
             return std::max(from, std::min(var, to));
         };
-        auto finalChance = static_cast<int>(100 / getNumberWithinRange(chance, 0.f, 100.f));
 
+        auto finalChance = static_cast<int>(100.f / getNumberWithinRange(chance, 0.f, 100.f));
 
-        const auto mutateVar = [=](auto& var, auto maxValue) {
-            auto shouldMutate = genRandom(0, finalChance) == 1;
-            if (shouldMutate) {
-                const auto max = maxValue / 2;
-                const auto min = -1 * max;
-                var += genRandom(min, max);
-                var = getNumberWithinRange(static_cast<int>(var), 0, static_cast<int>(maxValue));
-                var = var % maxValue;
-                var = var < 0 ? 0 : var;
-            }
-        };
+        auto shouldMutate = [&]() { return genRandom(0, finalChance) == 1; };
 
-        mutateVar(radius, sizeMax);
-        mutateVar(center.x, xMax);
-        mutateVar(center.y, yMax);
-        mutateVar(color.r, 255);
-        mutateVar(color.g, 255);
-        mutateVar(color.b, 255);
+        if (shouldMutate()) {
+            radius = static_cast<ucoor_t>(genRandom(sizeMin, sizeMax));
+        }
+
+        if (shouldMutate()) {
+            center.x = static_cast<ucoor_t>(genRandom(0, xMax));
+            center.y = static_cast<ucoor_t>(genRandom(0, yMax));
+        }
+
+        if (shouldMutate()) {
+            color.r = static_cast<uint8_t>(genRandom(0, 255));
+            color.g = static_cast<uint8_t>(genRandom(0, 255));
+            color.b = static_cast<uint8_t>(genRandom(0, 255));
+        }
     }
 }

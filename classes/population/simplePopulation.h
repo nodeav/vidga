@@ -25,7 +25,7 @@ namespace vidga {
         uint32_t imgResX, imgResY;
         ucoor_t minSideLen, maxSideLen;
 
-        void addIndividual(std::shared_ptr<simpleIndividual> shared_ptr);
+        void addIndividual(std::shared_ptr<simpleIndividual> individual);
     };
 }
 

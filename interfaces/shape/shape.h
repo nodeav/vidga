@@ -65,7 +65,7 @@ namespace vidga {
     public:
         explicit shape(coors center_);
         virtual bool contains(coors c) const = 0;
-        virtual void mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMax) = 0;
+        virtual void mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMin, ucoor_t sizeMax) = 0;
 
         // Getters
         virtual coors getCenter() const;
@@ -78,7 +78,7 @@ namespace vidga {
         virtual void setWidth(ucoor_t newWidth) = 0;
         virtual void setHeight(ucoor_t newHeight) = 0;
         virtual void setColor(bgr_color_t newColor) = 0;
-        virtual void setRandom(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) = 0;
+        virtual void setRandomEverything(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) = 0;
 
     private:
         coors center;

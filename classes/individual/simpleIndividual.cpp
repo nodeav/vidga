@@ -17,7 +17,7 @@ namespace vidga {
         shapes.reserve(size);
         for (auto i = 0; i < size; i++) {
             auto c = std::make_shared<circle>();
-            c->setRandom(sideLengthMin, sideLengthMax, xMax, yMax);
+            c->setRandomEverything(sideLengthMin, sideLengthMax, xMax, yMax);
             shapes.push_back(c);
         }
     }
@@ -54,9 +54,6 @@ namespace vidga {
         const auto bitsPerInt = sizeof(int) * 8;
         const auto intsOfRandomness = static_cast<int>(dstShapes.size() / bitsPerInt + 1);
 
-        auto srcIt = srcShapes.begin();
-        auto dstIt = dstShapes.begin();
-
         for (auto i = 0; i < intsOfRandomness; i++) {
             auto oneInt = genRandomInt();
             auto idx = i * bitsPerInt;
@@ -66,6 +63,8 @@ namespace vidga {
                 } else {
                     dstShapes[idx] = shapes[idx];
                 }
+
+                dstShapes[idx]->mutate(0.0001, xMax, yMax, sideLengthMin, sideLengthMax);
             }
         }
         return dst;
