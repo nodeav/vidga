@@ -77,18 +77,25 @@ namespace vidga {
         auto shouldMutate = [&]() { return genRandom(0, finalChance) == 1; };
 
         if (shouldMutate()) {
+//            std::cout << "radius changed from " << std::to_string(radius);
             radius = static_cast<ucoor_t>(genRandom(sizeMin, sizeMax));
+//            std::cout << " to " << std::to_string(radius) << std::endl;
         }
 
         if (shouldMutate()) {
+//            std::cout << "center changed from " << center;
             center.x = static_cast<ucoor_t>(genRandom(0, xMax));
             center.y = static_cast<ucoor_t>(genRandom(0, yMax));
+//            std::cout << " to " << center << std::endl;
+
         }
 
         if (shouldMutate()) {
+//            std::cout << "color changed from " << color;
             color.r = static_cast<uint8_t>(genRandom(0, 255));
             color.g = static_cast<uint8_t>(genRandom(0, 255));
             color.b = static_cast<uint8_t>(genRandom(0, 255));
+//            std::cout << " to " << color << std::endl;
         }
     }
 }

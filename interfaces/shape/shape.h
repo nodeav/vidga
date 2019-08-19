@@ -25,6 +25,10 @@ namespace vidga {
         explicit operator cv::Scalar() const {
             return cv::Scalar(b, g, r);
         }
+        friend std::ostream& operator<<(std::ostream& stream, const bgr_color_t& c) {
+            stream << "(" << std::to_string(c.r) << ", " << std::to_string(c.g) << ", " << std::to_string(c.b) << ")";
+            return stream;
+        }
     } bgr_color_t;
 
 

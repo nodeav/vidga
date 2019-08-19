@@ -49,7 +49,9 @@ namespace vidga {
         };
 
         for (auto i = 0; i < individuals.size(); i++) {
-            auto newIndividual = individuals[getRandomIndex()]->randMerge(individuals[getRandomIndex()],
+            auto randIdx1 = getRandomIndex();
+            auto randIdx2 = getRandomIndex();
+            auto newIndividual = individuals[randIdx1]->randMerge(individuals[randIdx2],
                     minSideLen, maxSideLen, imgResX, imgResY);
 
             result->addIndividual(newIndividual);

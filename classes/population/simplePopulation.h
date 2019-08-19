@@ -13,7 +13,7 @@ namespace vidga {
     class simplePopulation {
     public:
         simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor = 2.5,
-                         float minSizeFactor=0.03, float maxSizeFactor=0.1);
+                         float minSizeFactor=0, float maxSizeFactor=0.12);
 
 
         const std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;

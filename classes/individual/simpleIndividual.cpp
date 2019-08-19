@@ -59,12 +59,12 @@ namespace vidga {
             auto idx = i * bitsPerInt;
             for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
                 if (getBit(oneInt, j)) {
-                    dstShapes[idx] = srcShapes[idx];
+                    *dstShapes[idx] = *srcShapes[idx];
                 } else {
-                    dstShapes[idx] = shapes[idx];
+                    *dstShapes[idx] = *shapes[idx];
                 }
 
-                dstShapes[idx]->mutate(0.0001, xMax, yMax, sideLengthMin, sideLengthMax);
+                dstShapes[idx]->mutate(0.001, xMax, yMax, sideLengthMin, sideLengthMax);
             }
         }
         return dst;
