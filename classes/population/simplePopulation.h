@@ -25,7 +25,11 @@ namespace vidga {
         std::vector<std::shared_ptr<simpleIndividual>> individuals;
         uint32_t imgResX, imgResY;
         ucoor_t minSideLen, maxSideLen;
+
+        // TODO: make this a single array of structs
         std::array<std::thread, 8> threadPool;
+        std::array<std::unique_ptr<cv::Mat>, 8> canvasPool;
+        std::array<std::unique_ptr<cv::Mat>, 8> scratchCanvasPool;
         void addIndividual(std::shared_ptr<simpleIndividual> individual);
     };
 }

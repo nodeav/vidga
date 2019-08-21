@@ -23,6 +23,11 @@ namespace vidga {
             auto individual = std::make_shared<simpleIndividual>(numCircles, minSideLen, maxSideLen, xRes, yRes);
             individuals.push_back(individual);
         }
+
+        for (auto i = 0; i < canvasPool.size(); i++) {
+            canvasPool[i] = std::make_unique<cv::Mat>(xRes, yRes, CV_8UC3, cv::Scalar{255, 255, 255});
+            scratchCanvasPool[i] = std::make_unique<cv::Mat>(xRes, yRes, CV_32F);
+        }
     }
 
     const std::vector<std::shared_ptr<simpleIndividual>> simplePopulation::getIndividuals() const {
@@ -36,13 +41,11 @@ namespace vidga {
 
         for (auto i = 0; i < threadPool.size(); i++) {
             threadPool[i] = std::thread([&](int i) {
-                cv::Mat canvas(target.rows, target.cols, target.type(), {255, 255, 255});
-                cv::Mat scratchCanvas(target.rows, target.cols, CV_32F);
                 const auto from = numPerThread * i;
                 const auto to = numPerThread + from;
                 for (auto j = from; j < to; j++) {
-                    individuals[j]->calcAndSetScore(target, canvas, scratchCanvas);
-                    canvas = cv::Scalar({255, 255, 255});
+                    individuals[j]->calcAndSetScore(target, *canvasPool[i], *scratchCanvasPool[i]);
+                    *canvasPool[i] = cv::Scalar({255, 255, 255});
                 }
             }, i);
         }
