@@ -30,11 +30,27 @@ namespace vidga {
     }
 
     const void simplePopulation::sortByScore(cv::Mat &target) {
-        cv::Mat canvas(target.rows, target.cols, target.type());
-        for (const auto &individual : individuals) {
-            canvas = cv::Scalar({255, 255, 255});
-            individual->calcAndSetScore(target, canvas);
+
+        // currently has to be a natural number
+        auto numPerThread = individuals.size() / threadPool.size();
+
+        for (auto i = 0; i < threadPool.size(); i++) {
+            threadPool[i] = std::thread([&](int i) {
+                cv::Mat canvas(target.rows, target.cols, target.type(), {255, 255, 255});
+                cv::Mat scratchCanvas(target.rows, target.cols, CV_32F);
+                const auto from = numPerThread * i;
+                const auto to = numPerThread + from;
+                for (auto j = from; j < to; j++) {
+                    individuals[j]->calcAndSetScore(target, canvas, scratchCanvas);
+                    canvas = cv::Scalar({255, 255, 255});
+                }
+            }, i);
         }
+
+        for (auto& thread : threadPool) {
+            thread.join();
+        }
+
         std::sort(individuals.begin(), individuals.end(), [](const auto &first, const auto &second) {
             return first->getScore() < second->getScore();
         });

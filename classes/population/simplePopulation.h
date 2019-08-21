@@ -7,13 +7,14 @@
 
 #include <math.h>
 #include <vector>
+#include <thread>
 #include "../individual/simpleIndividual.h"
 
 namespace vidga {
     class simplePopulation {
     public:
         simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor = 2.5,
-                         float minSizeFactor=0, float maxSizeFactor=0.12);
+                         float minSizeFactor=0.02, float maxSizeFactor=0.3);
 
 
         const std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
@@ -24,7 +25,7 @@ namespace vidga {
         std::vector<std::shared_ptr<simpleIndividual>> individuals;
         uint32_t imgResX, imgResY;
         ucoor_t minSideLen, maxSideLen;
-
+        std::array<std::thread, 8> threadPool;
         void addIndividual(std::shared_ptr<simpleIndividual> individual);
     };
 }

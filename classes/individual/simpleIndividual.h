@@ -29,7 +29,7 @@ namespace vidga {
         void draw(cv::Mat& canvas) const;
         std::shared_ptr<simpleIndividual> randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
                                      ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
-        void calcAndSetScore(cv::Mat& target, cv::Mat& canvas);
+        void calcAndSetScore(cv::Mat& target, cv::Mat& canvas, cv::Mat& dst);
         float getScore() const;
 
     private:

@@ -58,42 +58,26 @@ namespace vidga {
             auto oneInt = genRandomInt();
             auto idx = i * bitsPerInt;
             for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
+                std::shared_ptr<shape>ptr;
                 if (getBit(oneInt, j)) {
-                    *dstShapes[idx] = *srcShapes[idx];
+                    ptr = srcShapes[idx];
                 } else {
-                    *dstShapes[idx] = *shapes[idx];
+                    ptr = shapes[idx];
                 }
-
-                dstShapes[idx]->mutate(0.001, xMax, yMax, sideLengthMin, sideLengthMax);
+                dstShapes[idx]->setColor(ptr->getColor());
+                dstShapes[idx]->setWidth(ptr->getWidth());
+                dstShapes[idx]->setCenter(ptr->getCenter());
+                dstShapes[idx]->mutate(0.01, xMax, yMax, sideLengthMin, sideLengthMax);
             }
         }
         return dst;
     }
 
-    void simpleIndividual::calcAndSetScore(cv::Mat& target, cv::Mat& canvas) {
+    void simpleIndividual::calcAndSetScore(cv::Mat& target, cv::Mat& canvas, cv::Mat& dst) {
         draw(canvas);
-        typedef cv::Point3_<uint8_t> Pixel;
-        double newScore = 0;
-//        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        for (int r = 0; r < target.rows; ++r) {
-            Pixel* targetPtr = target.ptr<Pixel>(r, 0);
-            Pixel* canvasPtr = canvas.ptr<Pixel>(r, 0);
-            const Pixel* ptr_end = targetPtr + target.cols;
-            while (targetPtr != ptr_end) {
-                ++targetPtr;
-                ++canvasPtr;
-                newScore += abs(targetPtr->x - canvasPtr->x);
-                newScore += abs(targetPtr->y - canvasPtr->y);
-                newScore += abs(targetPtr->z - canvasPtr->z);
-            }
-        }
-        score = static_cast<float>(newScore / (canvas.total() * canvas.channels()));
-
-        if (score == 0) {
-            std::cout << "score is 0 mofo" << std::endl;
-        }
-//        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-//        std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[µs]" << std::endl;
+        cv::absdiff(target, canvas, dst);
+        cv::Scalar newScore = cv::sum(dst);
+        score = (newScore.val[0] + newScore.val[1] + newScore.val[2]) / (canvas.total() * canvas.channels());
     }
 
     float simpleIndividual::getScore() const {
