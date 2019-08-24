@@ -6,21 +6,18 @@
 
 namespace vidga {
 
-    simplePopulation::simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor,
+    simplePopulation::simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize_,
                                               float minSizeFactor, float maxSizeFactor) {
 
         imgResX = xRes;
         imgResY = yRes;
         minSideLen = static_cast<ucoor_t>(minSizeFactor * xRes);
         maxSideLen = static_cast<ucoor_t>(maxSizeFactor * xRes);
-        const float avgRadius = static_cast<ucoor_t>((minSideLen + maxSideLen) / 2);
-
-        const auto avgCircleSize = (avgRadius * avgRadius * M_PI);
-        auto numCircles = static_cast<size_t >(circleAmountFactor * xRes * yRes / avgCircleSize);
+        individualSize = individualSize_;
 
         individuals.reserve(popSize);
         for (auto i = 0; i < popSize; i++) {
-            auto individual = std::make_shared<simpleIndividual>(numCircles, minSideLen, maxSideLen, xRes, yRes);
+            auto individual = std::make_shared<simpleIndividual>(individualSize, minSideLen, maxSideLen, xRes, yRes);
             individuals.push_back(individual);
         }
 
@@ -28,6 +25,10 @@ namespace vidga {
             canvasPool[i] = std::make_unique<cv::Mat>(xRes, yRes, CV_8UC3, cv::Scalar{255, 255, 255});
             scratchCanvasPool[i] = std::make_unique<cv::Mat>(xRes, yRes, CV_32F);
         }
+    }
+
+    uint16_t simplePopulation::getIndividualSize() const {
+        return individualSize;
     }
 
     const std::vector<std::shared_ptr<simpleIndividual>> simplePopulation::getIndividuals() const {
@@ -45,7 +46,7 @@ namespace vidga {
                 const auto to = numPerThread + from;
                 for (auto j = from; j < to; j++) {
                     individuals[j]->calcAndSetScore(target, *canvasPool[i], *scratchCanvasPool[i]);
-                    *canvasPool[i] = cv::Scalar({255, 255, 255});
+                    *canvasPool[i] = cv::Scalar({255, 255, 255, 255});
                 }
             }, i);
         }
@@ -61,7 +62,7 @@ namespace vidga {
 
     std::shared_ptr<simplePopulation> simplePopulation::nextGeneration() {
         auto topIndividualsCutoff = static_cast<int>(individuals.size() * 0.25);
-        auto result = std::make_shared<simplePopulation>(0, imgResX, imgResY);
+        auto result = std::make_shared<simplePopulation>(0, imgResX, imgResY, individualSize);
 
         auto getRandomIndex = [&]() {
             return genRandom(0, topIndividualsCutoff);

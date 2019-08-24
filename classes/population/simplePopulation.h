@@ -13,9 +13,8 @@
 namespace vidga {
     class simplePopulation {
     public:
-        simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, float circleAmountFactor = 2.5,
+        simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize,
                          float minSizeFactor=0.02, float maxSizeFactor=0.3);
-
 
         const std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
         const void sortByScore(cv::Mat &target);
@@ -25,7 +24,11 @@ namespace vidga {
         std::vector<std::shared_ptr<simpleIndividual>> individuals;
         uint32_t imgResX, imgResY;
         ucoor_t minSideLen, maxSideLen;
+        uint16_t individualSize;
+    public:
+        uint16_t getIndividualSize() const;
 
+    private:
         // TODO: make this a single array of structs
         std::array<std::thread, 8> threadPool;
         std::array<std::unique_ptr<cv::Mat>, 8> canvasPool;

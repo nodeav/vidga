@@ -23,7 +23,7 @@ int main() {
     cv::imshow(targetWinName, img);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(32, xRes, yRes, 2.5);
+    auto population = std::make_shared<simplePopulation>(32, xRes, yRes, 200);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -31,7 +31,7 @@ int main() {
     population->getIndividuals()[0]->draw(canvas1);
     cv::imshow(firstItrWinName, canvas1);
 
-    auto generations = 300000;
+    auto generations = 30000;
 
     for (auto i = 0; i < generations; i++) {
         population->sortByScore(img);

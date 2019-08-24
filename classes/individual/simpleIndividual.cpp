@@ -67,7 +67,13 @@ namespace vidga {
                 dstShapes[idx]->setColor(ptr->getColor());
                 dstShapes[idx]->setWidth(ptr->getWidth());
                 dstShapes[idx]->setCenter(ptr->getCenter());
-                dstShapes[idx]->mutate(0.01, xMax, yMax, sideLengthMin, sideLengthMax);
+                dstShapes[idx]->mutate(0.1, xMax, yMax, sideLengthMin, sideLengthMax);
+
+                if (genRandom(0, 100) == 1) {
+                    auto idx1 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
+                    auto idx2 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
+                    std::iter_swap(dstShapes.begin() + idx1, dstShapes.begin() + idx2);
+                }
             }
         }
         return dst;
@@ -77,7 +83,7 @@ namespace vidga {
         draw(canvas);
         cv::absdiff(target, canvas, dst);
         cv::Scalar newScore = cv::sum(dst);
-        score = (newScore.val[0] + newScore.val[1] + newScore.val[2]) / (canvas.total() * canvas.channels());
+        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) / (canvas.total() * canvas.channels()));
     }
 
     float simpleIndividual::getScore() const {
