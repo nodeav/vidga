@@ -59,7 +59,7 @@ namespace vidga {
             coor_t xDiffSquared = getSquaredDiff(x, c.x),
                    yDiffSquared = getSquaredDiff(y, c.y);
 
-            return std::sqrtf(xDiffSquared + yDiffSquared);
+            return sqrtf(xDiffSquared + yDiffSquared);
         }
 
         explicit operator cv::Point() const {

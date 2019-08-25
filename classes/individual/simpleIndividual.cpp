@@ -69,7 +69,7 @@ namespace vidga {
                 dstShapes[idx]->setCenter(ptr->getCenter());
                 dstShapes[idx]->mutate(0.1, xMax, yMax, sideLengthMin, sideLengthMax);
 
-                if (genRandom(0, 100) == 1) {
+                if (genRandom(0, 15) == 1) {
                     auto idx1 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
                     auto idx2 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
                     std::iter_swap(dstShapes.begin() + idx1, dstShapes.begin() + idx2);

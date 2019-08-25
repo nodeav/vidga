@@ -41,12 +41,12 @@ namespace vidga {
         auto numPerThread = individuals.size() / threadPool.size();
 
         for (auto i = 0; i < threadPool.size(); i++) {
-            threadPool[i] = std::thread([&](int i) {
+		threadPool[i] = std::thread([&](int i) {
                 const auto from = numPerThread * i;
                 const auto to = numPerThread + from;
                 for (auto j = from; j < to; j++) {
                     individuals[j]->calcAndSetScore(target, *canvasPool[i], *scratchCanvasPool[i]);
-                    *canvasPool[i] = cv::Scalar({255, 255, 255, 255});
+		    *canvasPool[i] = cv::Scalar({255, 255, 255, 255});
                 }
             }, i);
         }
