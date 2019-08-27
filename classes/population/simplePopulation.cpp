@@ -46,7 +46,7 @@ namespace vidga {
                 const auto to = numPerThread + from;
                 for (auto j = from; j < to; j++) {
                     individuals[j]->calcAndSetScore(target, *canvasPool[i], *scratchCanvasPool[i]);
-		    *canvasPool[i] = cv::Scalar({255, 255, 255, 255});
+		            *canvasPool[i] = cv::Scalar({255, 255, 255, 255});
                 }
             }, i);
         }
