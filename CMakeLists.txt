@@ -4,9 +4,10 @@ project(Vidga)
 set(CMAKE_CXX_STANDARD 14)
 set(PROJECT_NAME Vidga)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3 -ffast-math -pthread")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3 -ffast-math")
 
 find_package(OpenCV REQUIRED)
+find_package(Threads REQUIRED)
 
 add_executable(${PROJECT_NAME}
         main.cpp
@@ -19,4 +20,4 @@ add_executable(${PROJECT_NAME}
         classes/shapes/circle.cpp classes/shapes/circle.h
         classes/individual/simpleIndividual.cpp classes/individual/simpleIndividual.h classes/population/simplePopulation.cpp classes/population/simplePopulation.h classes/renderers/opencvRenderer.cpp classes/renderers/opencvRenderer.h)
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} Threads::Threads)

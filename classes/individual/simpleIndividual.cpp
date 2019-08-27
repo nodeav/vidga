@@ -4,11 +4,11 @@
 #include "simpleIndividual.h"
 
 namespace vidga {
-    std::vector<std::shared_ptr<shape>> &simpleIndividual::getShapesMut() {
+    std::vector<std::shared_ptr<circle>> &simpleIndividual::getShapesMut() {
         return shapes;
     }
 
-    const std::vector<std::shared_ptr<shape>> &simpleIndividual::getShapes() const {
+    const std::vector<std::shared_ptr<circle>> &simpleIndividual::getShapes() const {
         return shapes;
     }
 
@@ -58,15 +58,13 @@ namespace vidga {
             auto oneInt = genRandomInt();
             auto idx = i * bitsPerInt;
             for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
-                std::shared_ptr<shape>ptr;
+                std::shared_ptr<circle>ptr;
                 if (getBit(oneInt, j)) {
                     ptr = srcShapes[idx];
                 } else {
                     ptr = shapes[idx];
                 }
-                dstShapes[idx]->setColor(ptr->getColor());
-                dstShapes[idx]->setWidth(ptr->getWidth());
-                dstShapes[idx]->setCenter(ptr->getCenter());
+                *dstShapes[idx] = *ptr;
                 dstShapes[idx]->mutate(0.1, xMax, yMax, sideLengthMin, sideLengthMax);
 
                 if (genRandom(0, 15) == 1) {
