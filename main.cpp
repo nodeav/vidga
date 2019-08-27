@@ -14,7 +14,8 @@ using namespace vidga;
 
 int main() {
     // Load and display target image
-    auto img = cv::imread("/Users/Bunk/Downloads/GA/mona.png");
+    auto img = cv::imread("/Users/Bunk/Pictures/savtah/IMG_2057.JPG");
+    std::cout << "rows: " << img.rows << " and cols " << img.cols << std::endl;
     auto xRes = img.cols;
     auto yRes = img.rows;
     auto targetCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
@@ -23,7 +24,7 @@ int main() {
     cv::imshow(targetWinName, img);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(24, xRes, yRes, 150, 0.01, 0.1);
+    auto population = std::make_shared<simplePopulation>(32, xRes, yRes, 1200, 0.01, 0.15);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -65,7 +66,7 @@ int main() {
             bestPop = population;
         }
 
-        if (i % 1000 == 0) {
+        if (i % 100 == 0) {
             std::cout << "Generation [" << i+1 << " / " << generations << "] score is ["
                       <<  population->getIndividuals().front()->getScore() << "],"
                       << " and worst score is " << population->getIndividuals().back()->getScore()

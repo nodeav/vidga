@@ -22,8 +22,8 @@ namespace vidga {
         }
 
         for (auto i = 0; i < canvasPool.size(); i++) {
-            canvasPool[i] = std::make_unique<cv::Mat>(xRes, yRes, CV_8UC3, cv::Scalar{255, 255, 255});
-            scratchCanvasPool[i] = std::make_unique<cv::Mat>(xRes, yRes, CV_32F);
+            canvasPool[i] = std::make_unique<cv::Mat>(yRes, xRes, CV_8UC3, cv::Scalar{255, 255, 255});
+            scratchCanvasPool[i] = std::make_unique<cv::Mat>(yRes, xRes, CV_32F);
         }
     }
 
