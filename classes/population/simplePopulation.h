@@ -30,9 +30,9 @@ namespace vidga {
 
     private:
         // TODO: make this a single array of structs
-        std::array<std::thread, 16> threadPool;
-        std::array<std::unique_ptr<cv::Mat>, 16> canvasPool;
-        std::array<std::unique_ptr<cv::Mat>, 16> scratchCanvasPool;
+        std::array<std::thread, 8> threadPool;
+        std::array<std::unique_ptr<cv::Mat>, 8> canvasPool;
+        std::array<std::unique_ptr<cv::Mat>, 8> scratchCanvasPool;
         void addIndividual(std::shared_ptr<simpleIndividual> individual);
     };
 }
