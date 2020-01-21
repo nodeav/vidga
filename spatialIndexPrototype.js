@@ -7,13 +7,24 @@ const MIN_MBR_SIZE = 10
 
 const GRID_CELL_SIZE = 50
 
+let nextId = 0
+
 // Minimum Bounding Rectangle
 class MBR {
     constructor(x1, y1, x2, y2) {
+        this.id = nextId++
         this.x1 = x1
         this.y1 = y1
         this.x2 = x2
         this.y2 = y2
+    }
+
+    isIntersecting(x, y) {
+        return this.x1 <= x && x <= this.x2 && this.y1 <= y && y <= this.y2
+    }
+
+    toJSON() {
+        return this.id
     }
 }
 
@@ -47,7 +58,7 @@ const createSpatialIndex = (mbrs) => {
     mbrs.forEach((item, idx) => {
         for(let i = Math.floor(item.y1 / GRID_CELL_SIZE); i < Math.ceil(item.y2 / GRID_CELL_SIZE); i++) {
             for(let j = Math.floor(item.x1 / GRID_CELL_SIZE); j < Math.ceil(item.x2 / GRID_CELL_SIZE); j++) {
-                grid[i][j].push(idx) // Change to item instead of idx, using idx for more visual print
+                grid[i][j].push(item)
             }
         }
     })
@@ -61,11 +72,37 @@ const printSpatialIndex = (sidx) => {
     }
 }
 
-const searchUsingSpatialIndex = () => {
-
+const searchUsingSpatialIndex = (x, y, sidx) => {
+    return sidx[Math.floor(y / GRID_CELL_SIZE)][Math.floor(x / GRID_CELL_SIZE)].filter(mbr => mbr.isIntersecting(x, y))
 }
 
-const randomMbrs = createRandomMBRs()
+const mbrCount = 500000
+const randomMbrs = createRandomMBRs(mbrCount)
+const randomX = randRange(0, RESOLUTION.x)
+const randomY = randRange(0, RESOLUTION.y)
 
-printSpatialIndex(createSpatialIndex(randomMbrs))
-console.log(randomMbrs)
+let d1, d2, d3, d4, d5, d6
+
+d1 = Date.now()
+const mySpatialIndex = createSpatialIndex(randomMbrs)
+d2 = Date.now()
+
+console.log(`creating index time took: ${d2 - d1}ms`)
+
+// printSpatialIndex(mySpatialIndex)
+// console.log(randomMbrs)
+console.log(`number of object - ${mbrCount}`)
+
+d3 = Date.now()
+const result1 = searchUsingSpatialIndex(randomX, randomY, mySpatialIndex)
+d4 = Date.now()
+
+d5 = Date.now()
+const result2 = randomMbrs.filter(mbr => mbr.isIntersecting(randomX, randomY))
+d6 = Date.now()
+
+// console.log(`searching using index (x ${randX}, y ${randY}) - ${JSON.stringify(result1)}`)
+console.log(`searching using index time took: ${d4 - d3}ms`)
+
+// console.log(`searching without index (x ${randX}, y ${randY}) - ${JSON.stringify(result2)}`)
+console.log(`searching without index time took: ${d6 - d5}ms`)
