@@ -4,7 +4,7 @@ project(Vidga)
 set(CMAKE_CXX_STANDARD 14)
 set(PROJECT_NAME Vidga)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3 -ffast-math")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Ofast -ffast-math -march=native")
 
 find_package(OpenCV REQUIRED)
 find_package(Threads REQUIRED)

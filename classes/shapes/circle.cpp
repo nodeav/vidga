@@ -35,8 +35,7 @@ namespace vidga {
     }
 
     circle::circle(coors center_, ucoor_t radius_)
-        : shape(center_)
-        , radius(radius_) {
+            : shape(center_), radius(radius_) {
     }
 
     circle::circle(ucoor_t radius_) : circle({0, 0}, radius_) {
@@ -82,13 +81,21 @@ namespace vidga {
 
         if (shouldMutate()) {
             center.x = static_cast<ucoor_t>(genRandom(0, xMax));
-            center.y = static_cast<ucoor_t>(genRandom(0, yMax));
+        }
 
+        if (shouldMutate()) {
+            center.y = static_cast<ucoor_t>(genRandom(0, yMax));
         }
 
         if (shouldMutate()) {
             color.r = static_cast<uint8_t>(genRandom(0, 255));
+        }
+
+        if (shouldMutate()) {
             color.g = static_cast<uint8_t>(genRandom(0, 255));
+        }
+
+        if (shouldMutate()) {
             color.b = static_cast<uint8_t>(genRandom(0, 255));
         }
     }

@@ -15,6 +15,10 @@ namespace vidga {
         maxSideLen = static_cast<ucoor_t>(maxSizeFactor * xRes);
         individualSize = individualSize_;
 
+/*        std::cout << "Using: minSideLen=" << minSideLen <<
+		     ", maxSideLen =" << maxSideLen <<
+		     ", with " << individualSize << " individuals" << std::endl;
+*/
         individuals.reserve(popSize);
         for (auto i = 0; i < popSize; i++) {
             auto individual = std::make_shared<simpleIndividual>(individualSize, minSideLen, maxSideLen, xRes, yRes);
@@ -61,7 +65,7 @@ namespace vidga {
     }
 
     std::shared_ptr<simplePopulation> simplePopulation::nextGeneration() {
-        auto topIndividualsCutoff = static_cast<int>(individuals.size() * 0.25);
+        auto topIndividualsCutoff = static_cast<int>(individuals.size() * 0.2);
         auto result = std::make_shared<simplePopulation>(0, imgResX, imgResY, individualSize);
 
         auto getRandomIndex = [&]() {
