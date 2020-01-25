@@ -21,3 +21,8 @@ add_executable(${PROJECT_NAME}
         classes/individual/simpleIndividual.cpp classes/individual/simpleIndividual.h classes/population/simplePopulation.cpp classes/population/simplePopulation.h classes/renderers/opencvRenderer.cpp classes/renderers/opencvRenderer.h)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} Threads::Threads)
+
+
+set(PROTO_TARGET_NAME prototype)
+include_directories(prototype)
+add_executable(${PROTO_TARGET_NAME} prototype/main.cpp)
