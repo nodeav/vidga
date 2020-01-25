@@ -4,12 +4,6 @@
 #include <chrono>
 
 int main(int argc, char **argv) {
-    Circle circle{
-            .color = {0, 0, 0},
-            .position = {10, 10},
-            .radius = 9
-    };
-
     constexpr int numCircles = 5e7;
     constexpr int width = 500;
     constexpr int height = 500;
