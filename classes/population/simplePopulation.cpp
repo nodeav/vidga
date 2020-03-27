@@ -11,8 +11,9 @@ namespace vidga {
 
         imgResX = xRes;
         imgResY = yRes;
-        minSideLen = static_cast<ucoor_t>(minSizeFactor * xRes);
-        maxSideLen = static_cast<ucoor_t>(maxSizeFactor * xRes);
+        auto avg = (xRes + yRes) / 2;
+        minSideLen = static_cast<ucoor_t>(minSizeFactor * avg);
+        maxSideLen = static_cast<ucoor_t>(maxSizeFactor * avg);
         individualSize = individualSize_;
 
 /*        std::cout << "Using: minSideLen=" << minSideLen <<
@@ -35,28 +36,23 @@ namespace vidga {
         return individualSize;
     }
 
-    const std::vector<std::shared_ptr<simpleIndividual>> simplePopulation::getIndividuals() const {
+    std::vector<std::shared_ptr<simpleIndividual>> simplePopulation::getIndividuals() const {
         return individuals;
     }
 
-    const void simplePopulation::sortByScore(cv::Mat &target) {
-
-        // currently has to be a natural number
-        auto numPerThread = individuals.size() / threadPool.size();
-
-        for (auto i = 0; i < threadPool.size(); i++) {
-		threadPool[i] = std::thread([&](int i) {
-                const auto from = numPerThread * i;
-                const auto to = numPerThread + from;
-                for (auto j = from; j < to; j++) {
-                    individuals[j]->calcAndSetScore(target, *canvasPool[i], *scratchCanvasPool[i]);
-		            *canvasPool[i] = cv::Scalar({255, 255, 255});
-                }
+    void simplePopulation::sortByScore(cv::Mat &target) {
+        static std::vector<std::future<void>> futures{individuals.size()};
+        for (auto i = 0; i < individuals.size(); i++) {
+            futures[i] = threadPool.enqueue([&](int i) {
+                static thread_local cv::Mat canvas(imgResY, imgResX, CV_8UC3, cv::Scalar{255, 255, 255});
+                static thread_local cv::Mat scratchCanvas(imgResY, imgResX, CV_32F);;
+                individuals[i]->calcAndSetScore(target, canvas, scratchCanvas);
+                canvas.setTo(cv::Scalar({255, 255, 255}));
             }, i);
         }
 
-        for (auto& thread : threadPool) {
-            thread.join();
+        for (auto& future : futures) {
+            future.wait();
         }
 
         std::sort(individuals.begin(), individuals.end(), [](const auto &first, const auto &second) {

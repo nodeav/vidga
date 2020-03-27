@@ -1,11 +1,9 @@
 #include <iostream>
-#include <vector>
 #include "classes/shapes/circle.h"
 #include "classes/individual/simpleIndividual.h"
 #include "classes/population/simplePopulation.h"
 
 #include "opencv2/core/mat.hpp"
-#include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 
 #include <chrono>
@@ -16,9 +14,12 @@ using namespace std::chrono_literals;
 
 int main() {
     // Load and display target image
-    // auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
+//     auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
 //    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
     auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
+//    auto img = cv::imread("/home/nadav/Pictures/vlcsnap-2020-03-27-00h45m02s240.png"); // 4K!!
+//    auto img = cv::imread("/home/nadav/Pictures/ratatouille.640x268.2.png");
+
     std::cout << "rows: " << img.rows << " and cols " << img.cols << std::endl;
     auto xRes = img.cols;
     auto yRes = img.rows;
@@ -28,7 +29,7 @@ int main() {
     cv::imshow(targetWinName, img);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(48, xRes, yRes, 150, 0.001, 0.3);
+    auto population = std::make_shared<simplePopulation>(60, xRes, yRes, 250, 0.001, 0.1);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -72,9 +73,9 @@ int main() {
 
     auto statusThread = std::thread([&i, &prevI]() {
         while (true) {
-            std::cout << "Speed: " << (i - prevI) / 60 << " Gen/s" << std::endl;
+            std::cout << "Speed: " << (i - prevI) / 5 << " Gen/s" << std::endl;
             prevI = i;
-            std::this_thread::sleep_for(1min);
+            std::this_thread::sleep_for(5s);
         }
     });
 

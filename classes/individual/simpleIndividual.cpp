@@ -2,6 +2,8 @@
 // Created by Nadav Eidelstein on 03/08/2019.
 //
 #include "simpleIndividual.h"
+#include <mutex>
+#include "util.h"
 
 namespace vidga {
     std::vector<std::shared_ptr<circle>> &simpleIndividual::getShapesMut() {
@@ -42,12 +44,13 @@ namespace vidga {
         return genRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     }
 
-    std::shared_ptr<simpleIndividual> simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
-                                                   ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
+    std::shared_ptr<simpleIndividual>
+    simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
+                                ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
         auto dst = std::make_shared<simpleIndividual>(shapes.size(), sideLengthMin, sideLengthMax, xMax, yMax);
-        auto& dstShapes = dst->getShapesMut();
+        auto &dstShapes = dst->getShapesMut();
 
-        auto& srcShapes = src->getShapesMut();
+        auto &srcShapes = src->getShapesMut();
         dstShapes.reserve(src->getShapes().size());
 
         // We only need 1 bit of randomness per decision
@@ -58,14 +61,14 @@ namespace vidga {
             auto oneInt = genRandomInt();
             auto idx = i * bitsPerInt;
             for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
-                std::shared_ptr<circle>ptr;
+                std::shared_ptr<circle> ptr;
                 if (getBit(oneInt, j)) {
                     ptr = srcShapes[idx];
                 } else {
                     ptr = shapes[idx];
                 }
                 *dstShapes[idx] = *ptr;
-                dstShapes[idx]->mutate(0.3333, xMax, yMax, sideLengthMin, sideLengthMax);
+                dstShapes[idx]->mutate(0.5, xMax, yMax, sideLengthMin, sideLengthMax);
 
                 if (genRandom(0, 50) == 1) {
                     auto idx1 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
@@ -77,11 +80,12 @@ namespace vidga {
         return dst;
     }
 
-    void simpleIndividual::calcAndSetScore(cv::Mat& target, cv::Mat& canvas, cv::Mat& dst) {
+    void simpleIndividual::calcAndSetScore(cv::Mat &target, cv::Mat &canvas, cv::Mat &dst) {
         draw(canvas);
         cv::absdiff(target, canvas, dst);
         cv::Scalar newScore = cv::sum(dst);
-        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) / (canvas.total() * canvas.channels()));
+        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
+                                   (canvas.total() * canvas.channels()));
     }
 
     float simpleIndividual::getScore() const {

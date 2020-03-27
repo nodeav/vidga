@@ -8,6 +8,10 @@ struct Color {
 
 struct Position {
     uint16_t x, y;
+
+    friend std::ostream &operator<<(std::ostream &os, const Position &p) {
+        return os << "{ x: " << p.x << ", y: " << p.y << " }";
+    }
 };
 
 struct BBox {
@@ -18,6 +22,11 @@ struct Circle {
     Color color;
     Position position;
     uint16_t radius;
+    int id = 0;
+
+    friend std::ostream &operator<<(std::ostream &os, const Circle &c) {
+        return os << "{ id: " << c.id << ", radius: " << c.radius << ", position: " << c.position << " }";
+    }
 
     BBox toBBox() const {
         uint16_t left = std::max(position.x, radius) - radius;
@@ -35,9 +44,6 @@ struct Circle {
 class Grid {
     struct Block {
         std::vector<Circle> circles;
-        Block() {
-            circles.reserve(40);
-        }
     };
 
     int blockSize;
@@ -50,13 +56,31 @@ public:
     void addCircle(const Circle &c);
 
     void getCircles(const Position &pos);
+
+    friend std::ostream &operator<<(std::ostream &os, const Grid &grid) {
+        os << "[";
+        for (auto y = 0; y < grid.nBlocksY; y++) {
+            os << "\t";
+            for (auto x = 0; x < grid.nBlocksX; x++) {
+                os << "[" << grid.blocks[y * grid.nBlocksY + x].circles.size() << "],";
+//                os << "[";
+//                for (const auto &circle : grid.blocks[y * grid.nBlocksY + x].circles) {
+//                    os << circle.id << ", ";
+//                }
+//                os << "],";
+            }
+            os << "\n";
+        }
+        return os << "]";
+    };
+
 };
 
 void Grid::addCircle(const Circle &c) {
     auto bbox = c.toBBox();
     auto fromX = bbox.tl.x / blockSize, fromY = bbox.tl.y / blockSize;
-    auto toX = std::min(static_cast<int>(nBlocksX), (bbox.br.x + blockSize) / blockSize) - 1;
-    auto toY = std::min(static_cast<int>(nBlocksY), (bbox.br.y + blockSize) / blockSize) - 1;
+    auto toX = std::min(static_cast<int>(nBlocksX), bbox.br.x / blockSize + 1);
+    auto toY = std::min(static_cast<int>(nBlocksY), bbox.br.y / blockSize + 1);
 
     // TODO: Improve cache efficiency (reduce random access)
     for (auto y = fromY; y < toY; y++) {
@@ -71,8 +95,8 @@ void Grid::getCircles(const Position &pos) {
 }
 
 Grid::Grid(int width, int height, int blockSize_) : blockSize(blockSize_) {
-    nBlocksX = (width + blockSize) / blockSize; // ceil int division
-    nBlocksY = (height + blockSize) / blockSize; // ceil int division
+    nBlocksX = (width + blockSize) / blockSize - 1; // ceil int division
+    nBlocksY = (height + blockSize) / blockSize - 1; // ceil int division
     int numBlocks = nBlocksX * nBlocksY;
     blocks.reserve(numBlocks);
     for (auto i = 0; i < numBlocks; i++) {

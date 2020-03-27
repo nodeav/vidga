@@ -5,10 +5,11 @@
 #ifndef VIDGA_SIMPLEPOPULATION_H
 #define VIDGA_SIMPLEPOPULATION_H
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <thread>
 #include "../individual/simpleIndividual.h"
+#include "util.h"
 
 namespace vidga {
     class simplePopulation {
@@ -16,8 +17,8 @@ namespace vidga {
         simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize,
                          float minSizeFactor=0.001, float maxSizeFactor=0.2);
 
-        const std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
-        const void sortByScore(cv::Mat &target);
+        std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
+        void sortByScore(cv::Mat &target);
         std::shared_ptr<simplePopulation> nextGeneration();
 
     private:
@@ -29,10 +30,9 @@ namespace vidga {
         uint16_t getIndividualSize() const;
 
     private:
-        // TODO: make this a single array of structs
-        std::array<std::thread, 16> threadPool;
-        std::array<std::unique_ptr<cv::Mat>, 16> canvasPool;
-        std::array<std::unique_ptr<cv::Mat>, 16> scratchCanvasPool;
+        ThreadPool threadPool{24};
+        std::vector<std::unique_ptr<cv::Mat>> canvasPool;
+        std::vector<std::unique_ptr<cv::Mat>> scratchCanvasPool;
         void addIndividual(std::shared_ptr<simpleIndividual> individual);
     };
 }
