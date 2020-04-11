@@ -1,4 +1,6 @@
 #include "cudaCircles.cuh"
+//#include "opencv2/core/mat.hpp"
+//#include "opencv2/highgui.hpp"
 
 __global__ void genSmoothCircleMap(float *buffer, unsigned short radius) {
     const unsigned int strideX = blockDim.x * gridDim.x;
@@ -25,14 +27,13 @@ __global__ void genSmoothCircleMap(float *buffer, unsigned short radius) {
 
 void initCircleMaps(unsigned minRadius, unsigned maxRadius, float **gpuBuffers) {
     unsigned numCircles = maxRadius - minRadius + 1;
-    cudaMalloc(&gpuBuffers, numCircles * sizeof(float*));
+    gpuBuffers = static_cast<float **>(malloc(numCircles * sizeof(float *)));
     for (auto i = minRadius; i <= maxRadius; i++) {
         auto idx = i - minRadius;
-        unsigned memToAlloc = 4 * i * i * sizeof(float);
-        float* circleBuf = gpuBuffers[idx];
+        unsigned memToAlloc = 4 * i * i * sizeof(float *);
+        float *circleBuf = gpuBuffers[idx];
         cudaMalloc(&circleBuf, memToAlloc);
         genSmoothCircleMap<<<32, 32>>>(circleBuf, i);
     }
-
     cudaDeviceSynchronize();
 }

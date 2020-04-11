@@ -12,7 +12,12 @@ find_package(CUDA REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(. cuda)
+include_directories(
+        .
+        cuda
+        ${CUDA_INCLUDE_DIRS}
+        ${OPENCV_INCLUDE_DIRS}
+)
 
 add_library(UTIL STATIC util.cpp util.h)
 
@@ -31,11 +36,11 @@ add_executable(${PROJECT_NAME}
         classes/population/simplePopulation.h
         classes/renderers/opencvRenderer.cpp
         classes/renderers/opencvRenderer.h
-        ${CUDA_INCLUDE_DIRS}
         util.h)
 
 set(CUDA_LIB_NAME "cudacircles")
 add_library(${CUDA_LIB_NAME} SHARED cuda/cudaCircles.cu cuda/cudaCircles.cu cuda/cudaCircles.cuh)
+target_link_libraries(${CUDA_LIB_NAME} ${OpenCV_LIBS})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} UTIL Threads::Threads ${CUDA_LIBRARIES} ${CUDA_LIB_NAME})
 
     #set(PROTO_TARGET_NAME prototype)
