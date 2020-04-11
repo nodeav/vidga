@@ -8,15 +8,19 @@
 
 #include <chrono>
 #include <mutex>
+#include <cuda/cudaCircles.cuh>
 
 using namespace vidga;
 using namespace std::chrono_literals;
 
 int main() {
+    float** gpuBuf;
+    initCircleMaps(3, 7, gpuBuf);
+    cv::waitKey(0);
     // Load and display target image
 //     auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
-//    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
-    auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
+    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
+//    auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
 //    auto img = cv::imread("/home/nadav/Pictures/vlcsnap-2020-03-27-00h45m02s240.png"); // 4K!!
 //    auto img = cv::imread("/home/nadav/Pictures/ratatouille.640x268.2.png");
 

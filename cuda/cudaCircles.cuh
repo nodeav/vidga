@@ -1,14 +1,5 @@
-//
-// Created by nadav on 4/11/20.
-//
-
-#ifndef VIDGA_CUDACIRCLES_CUH
-#define VIDGA_CUDACIRCLES_CUH
-
+void initCircleMaps(unsigned minRadius, unsigned maxRadius, float **gpuBuffers);
 
 class cudaCircles {
-
+private:
 };
-
-
-#endif //VIDGA_CUDACIRCLES_CUH

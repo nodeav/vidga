@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 3.12)
-project(Vidga)
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+set(CMAKE_CXX_COMPILER "/usr/local/cuda/bin/nvcc")
+project(Vidga CXX CUDA)
+
+enable_language(CUDA)
 
 set(CMAKE_CXX_STANDARD 14)
-set(PROJECT_NAME Vidga)
+set(CMAKE_CUDA_STANDARD 14)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Ofast -march=native -mtune=native")
-
+find_package(CUDA REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(".")
+include_directories(. cuda)
 
 add_library(UTIL STATIC util.cpp util.h)
 
@@ -27,15 +30,13 @@ add_executable(${PROJECT_NAME}
         classes/population/simplePopulation.cpp
         classes/population/simplePopulation.h
         classes/renderers/opencvRenderer.cpp
-        classes/renderers/opencvRenderer.h util.h)
+        classes/renderers/opencvRenderer.h
+        ${CUDA_INCLUDE_DIRS}
+        util.h)
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} UTIL Threads::Threads)
-
-if (ENABLE_CUDA)
-    set(CUDA_LIB_NAME "cudacircles")
-    add_library(${CUDA_LIB_NAME} SHARED cuda/cudaCircles.cu cuda/cudaCircles.cu cuda/cudaCircles.cuh)
-    target_link_libraries(${PROJECT_NAME} ${CUDA_LIB_NAME})
-endif()
+set(CUDA_LIB_NAME "cudacircles")
+add_library(${CUDA_LIB_NAME} SHARED cuda/cudaCircles.cu cuda/cudaCircles.cu cuda/cudaCircles.cuh)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} UTIL Threads::Threads ${CUDA_LIBRARIES} ${CUDA_LIB_NAME})
 
     #set(PROTO_TARGET_NAME prototype)
 #include_directories(prototype)
