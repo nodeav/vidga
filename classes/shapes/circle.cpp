@@ -47,9 +47,10 @@ namespace vidga {
         center = coors::generateRandom(xMax, yMax);
         radius = static_cast<ucoor_t>(genRandom(sideLengthMin, sideLengthMax));
         color = {
-                static_cast<uint8_t>(genRandom(0, 255)),
-                static_cast<uint8_t>(genRandom(0, 255)),
-                static_cast<uint8_t>(genRandom(0, 255))
+                genRandom(0.f, 1.f),
+                genRandom(0.f, 1.f),
+                genRandom(0.f, 1.f),
+                genRandom(0.f, 1.f)
         };
     }
 
@@ -63,7 +64,7 @@ namespace vidga {
 
     void circle::mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMin, ucoor_t sizeMax) {
 
-        if (!chance) {
+        if (chance == 0.f) {
             return;
         }
 
@@ -71,9 +72,7 @@ namespace vidga {
             return std::max(from, std::min(var, to));
         };
 
-        auto finalChance = static_cast<int>(100.f / getNumberWithinRange(chance, 0.f, 100.f));
-
-        auto shouldMutate = [&]() { return genRandom(0, finalChance) == 1; };
+        auto shouldMutate = [&]() { return genRandom(0, 100.f) < chance; };
 
         if (shouldMutate()) {
             radius = static_cast<ucoor_t>(genRandom(sizeMin, sizeMax));
@@ -88,22 +87,26 @@ namespace vidga {
         }
 
         if (shouldMutate()) {
-            color.r = static_cast<uint8_t>(genRandom(0, 255));
+            color.x = genRandom(0, 1);
         }
 
         if (shouldMutate()) {
-            color.g = static_cast<uint8_t>(genRandom(0, 255));
+            color.y = genRandom(0, 1);
         }
 
         if (shouldMutate()) {
-            color.b = static_cast<uint8_t>(genRandom(0, 255));
+            color.y = genRandom(0, 1);
+        }
+
+        if (shouldMutate()) {
+            color.w = genRandom(0, 1);
         }
     }
-
-    circle &circle::operator=(const circle &rhs) noexcept {
-        center = rhs.center;
-        radius = rhs.radius;
-        color = rhs.color;
-        return *this;
-    }
+//
+//    circle &circle::operator=(const circle &rhs) noexcept {
+//        center = rhs.center;
+//        radius = rhs.radius;
+//        color = rhs.color;
+//        return *this;
+//    }
 }

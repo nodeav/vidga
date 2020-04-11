@@ -13,8 +13,8 @@ namespace vidga {
 
     class individual {
     public:
-        virtual const std::vector<std::shared_ptr<circle>>& getShapes() const = 0;
-        virtual std::vector<std::shared_ptr<circle>>& getShapesMut() = 0;
+        virtual std::vector<circle> & getShapes() const = 0;
+        virtual std::vector<circle> & getShapesMut() = 0;
     private:
         std::vector<std::shared_ptr<circle>> shapes;
     };

@@ -23,16 +23,23 @@ namespace vidga {
     class simpleIndividual : individual {
     public:
         simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
-        const std::vector<std::shared_ptr<circle>>& getShapes() const override;
-        std::vector<std::shared_ptr<circle>>& getShapesMut() override;
-        void draw(cv::Mat& canvas) const;
+
+        std::vector<circle> &getShapes() const override;
+
+        std::vector<circle> &getShapesMut() override;
+
+        void draw(float3 *canvas, float **map) const;
+
         std::shared_ptr<simpleIndividual> randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
-                                     ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
-        void calcAndSetScore(cv::Mat& target, cv::Mat& canvas, cv::Mat& dst);
+                                                    ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
+
+        void calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap);
+
         float getScore() const;
 
     private:
-        std::vector<std::shared_ptr<circle>> shapes;
+        std::vector<circle> circles;
+        unsigned width, height;
         float score = 4;
 
     };

@@ -1,38 +1,33 @@
 //
 // Created by Nadav Eidelstein on 03/08/2019.
 //
-#include "simpleIndividual.h"
 #include <mutex>
+
 #include "util.h"
+#include "simpleIndividual.h"
+#include "cudaCircles.cuh"
 
 namespace vidga {
-    std::vector<std::shared_ptr<circle>> &simpleIndividual::getShapesMut() {
-        return shapes;
-    }
-
-    const std::vector<std::shared_ptr<circle>> &simpleIndividual::getShapes() const {
-        return shapes;
+    std::vector<circle> &simpleIndividual::getShapesMut() {
+        return circles;
     }
 
     simpleIndividual::simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax,
                                        ucoor_t xMax, ucoor_t yMax) {
-        shapes.reserve(size);
+        width = xMax;
+        height = yMax;
+        circles.reserve(size);
         for (auto i = 0; i < size; i++) {
-            auto c = std::make_shared<circle>();
-            c->setRandomEverything(sideLengthMin, sideLengthMax, xMax, yMax);
-            shapes.push_back(c);
+            circle c;
+            c.setRandomEverything(sideLengthMin, sideLengthMax, xMax, yMax);
+            circles.push_back(c);
         }
     }
 
-    void simpleIndividual::draw(cv::Mat &canvas) const {
+    void simpleIndividual::draw(float3 *canvas, float **map) const {
         int i = 0;
-        for (auto const &circle : shapes) {
-            if (circle == nullptr) {
-                std::cout << "circle #" << i++ << " is null!" << std::endl;
-                continue;
-            }
-            const auto pt = cv::Point(circle->getCenter());
-            cv::circle(canvas, pt, circle->getWidth(), cv::Scalar(circle->getColor()), -1);
+        for (auto const &circle : circles) {
+            cuda::drawUsingMapHostFn(canvas, width, height, map, circle);
         }
     }
 
@@ -47,7 +42,7 @@ namespace vidga {
     std::shared_ptr<simpleIndividual>
     simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
                                 ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
-        auto dst = std::make_shared<simpleIndividual>(shapes.size(), sideLengthMin, sideLengthMax, xMax, yMax);
+        auto dst = std::make_shared<simpleIndividual>(circles.size(), sideLengthMin, sideLengthMax, xMax, yMax);
         auto &dstShapes = dst->getShapesMut();
 
         auto &srcShapes = src->getShapesMut();
@@ -61,16 +56,16 @@ namespace vidga {
             auto oneInt = genRandomInt();
             auto idx = i * bitsPerInt;
             for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
-                std::shared_ptr<circle> ptr;
+                circle cir;
                 if (getBit(oneInt, j)) {
-                    ptr = srcShapes[idx];
+                    cir = srcShapes[idx];
                 } else {
-                    ptr = shapes[idx];
+                    cir = circles[idx];
                 }
-                *dstShapes[idx] = *ptr;
-                dstShapes[idx]->mutate(0.5, xMax, yMax, sideLengthMin, sideLengthMax);
+                dstShapes[idx] = cir;
+                dstShapes[idx].mutate(0.5, xMax, yMax, sideLengthMin, sideLengthMax);
 
-                if (genRandom(0, 50) == 1) {
+                if (genRandom(0, 50) < 1) {
                     auto idx1 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
                     auto idx2 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
                     std::iter_swap(dstShapes.begin() + idx1, dstShapes.begin() + idx2);
@@ -80,12 +75,12 @@ namespace vidga {
         return dst;
     }
 
-    void simpleIndividual::calcAndSetScore(cv::Mat &target, cv::Mat &canvas, cv::Mat &dst) {
-        draw(canvas);
-        cv::absdiff(target, canvas, dst);
-        cv::Scalar newScore = cv::sum(dst);
-        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
-                                   (canvas.total() * canvas.channels()));
+    void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap) {
+        draw(canvas, circlesMap);
+//        cv::absdiff(target, canvas, circlesMap);
+//        cv::Scalar newScore = cv::sum(circlesMap);
+//        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
+//                                   (canvas.total() * canvas.channels()));
     }
 
     float simpleIndividual::getScore() const {

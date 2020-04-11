@@ -1,19 +1,19 @@
-//
-// Created by Nadav Eidelstein on 07/08/2019.
-//
-
 #include "simplePopulation.h"
+#include "cudaCircles.cuh"
 
 namespace vidga {
-
     simplePopulation::simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize_,
-                                              float minSizeFactor, float maxSizeFactor) {
+                                       float minSizeFactor, float maxSizeFactor) {
 
         imgResX = xRes;
         imgResY = yRes;
+
         auto avg = (xRes + yRes) / 2;
         minSideLen = static_cast<ucoor_t>(minSizeFactor * avg);
         maxSideLen = static_cast<ucoor_t>(maxSizeFactor * avg);
+
+        vidga::cuda::initCircleMaps(minSideLen, maxSideLen, circlesMap);
+
         individualSize = individualSize_;
 
 /*        std::cout << "Using: minSideLen=" << minSideLen <<
@@ -40,18 +40,18 @@ namespace vidga {
         return individuals;
     }
 
-    void simplePopulation::sortByScore(cv::Mat &target) {
+    void simplePopulation::sortByScore(float3 *target) {
         static std::vector<std::future<void>> futures{individuals.size()};
         for (auto i = 0; i < individuals.size(); i++) {
             futures[i] = threadPool.enqueue([&](int i) {
                 static thread_local cv::Mat canvas(imgResY, imgResX, CV_8UC3, cv::Scalar{255, 255, 255});
                 static thread_local cv::Mat scratchCanvas(imgResY, imgResX, CV_32F);;
-                individuals[i]->calcAndSetScore(target, canvas, scratchCanvas);
+                individuals[i]->calcAndSetScore(target, canvas, circlesMap);
                 canvas.setTo(cv::Scalar({255, 255, 255}));
             }, i);
         }
 
-        for (auto& future : futures) {
+        for (auto &future : futures) {
             future.wait();
         }
 
@@ -72,7 +72,7 @@ namespace vidga {
             auto randIdx1 = getRandomIndex();
             auto randIdx2 = getRandomIndex();
             auto newIndividual = individuals[randIdx1]->randMerge(individuals[randIdx2],
-                    minSideLen, maxSideLen, imgResX, imgResY);
+                                                                  minSideLen, maxSideLen, imgResX, imgResY);
 
             result->addIndividual(newIndividual);
         }
@@ -83,4 +83,5 @@ namespace vidga {
     void simplePopulation::addIndividual(std::shared_ptr<simpleIndividual> individual) {
         individuals.push_back(individual);
     }
+
 }

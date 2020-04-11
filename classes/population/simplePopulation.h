@@ -18,7 +18,7 @@ namespace vidga {
                          float minSizeFactor=0.001, float maxSizeFactor=0.2);
 
         std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
-        void sortByScore(cv::Mat &target);
+        void sortByScore(float3 *target);
         std::shared_ptr<simplePopulation> nextGeneration();
 
     private:
@@ -34,6 +34,7 @@ namespace vidga {
         std::vector<std::unique_ptr<cv::Mat>> canvasPool;
         std::vector<std::unique_ptr<cv::Mat>> scratchCanvasPool;
         void addIndividual(std::shared_ptr<simpleIndividual> individual);
+        float **circlesMap;
     };
 }
 

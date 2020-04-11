@@ -8,6 +8,7 @@
 #include <ostream>
 #include "opencv2/core/types.hpp"
 #include <random>
+#include <vector_types.h>
 
 namespace vidga {
     typedef unsigned int ucoor_t;
@@ -16,24 +17,25 @@ namespace vidga {
     static std::random_device randomDevice;
     static std::mt19937 numberGenerator(randomDevice());
 
-    static int genRandom(int from, int to) {
-        return std::uniform_int_distribution<int>(from, to)(numberGenerator);
+    static float genRandom(float from, float to) {
+        return std::uniform_real_distribution<float>(from, to)(numberGenerator);
     }
 
-    typedef struct bgr_color_t {
-        uint8_t r, g, b;
-        explicit operator cv::Scalar() const {
-            return cv::Scalar(b, g, r);
-        }
-        friend std::ostream& operator<<(std::ostream& stream, const bgr_color_t& c) {
-            stream << "(" << std::to_string(c.r)
-                   << ", " << std::to_string(c.g)
-                   << ", " << std::to_string(c.b)
-                   << ")";
-            return stream;
-        }
-    } bgr_color_t;
-
+//    typedef struct bgr_color_t {
+//        float r, g, b, a;
+//        explicit operator cv::Scalar() const {
+//            return cv::Scalar(b, g, r, a);
+//        }
+//        friend std::ostream& operator<<(std::ostream& stream, const bgr_color_t& c) {
+//            stream << "(" << std::to_string(c.r)
+//                   << ", " << std::to_string(c.g)
+//                   << ", " << std::to_string(c.b)
+//                   << ", " << std::to_string(c.a)
+//                   << ")";
+//            return stream;
+//        }
+//    } bgr_color_t;
+    typedef float4 bgr_color_t;
 
     typedef struct coors {
         ucoor_t x;
