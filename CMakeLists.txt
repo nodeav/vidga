@@ -31,7 +31,12 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} UTIL Threads::Threads)
 
+if (ENABLE_CUDA)
+    set(CUDA_LIB_NAME "cudacircles")
+    add_library(${CUDA_LIB_NAME} SHARED cuda/cudaCircles.cu cuda/cudaCircles.cu cuda/cudaCircles.cuh)
+    target_link_libraries(${PROJECT_NAME} ${CUDA_LIB_NAME})
+endif()
 
-#set(PROTO_TARGET_NAME prototype)
+    #set(PROTO_TARGET_NAME prototype)
 #include_directories(prototype)
 #add_executable(${PROTO_TARGET_NAME} prototype/main.cpp)
