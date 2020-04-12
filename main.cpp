@@ -15,8 +15,8 @@ using namespace std::chrono_literals;
 int main() {
     // Load and display target image
 //     auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
-//    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
-    auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
+    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
+//    auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
 //    auto img = cv::imread("/home/nadav/Pictures/vlcsnap-2020-03-27-00h45m02s240.png"); // 4K!!
 //    auto img = cv::imread("/home/nadav/Pictures/ratatouille.640x268.2.png");
 
@@ -29,7 +29,7 @@ int main() {
     cv::imshow(targetWinName, img);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(60, xRes, yRes, 250, 0.001, 0.1);
+    auto population = std::make_shared<simplePopulation>(30, xRes, yRes, 120);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
