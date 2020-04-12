@@ -23,8 +23,8 @@ namespace vidga {
             const unsigned int strideY = blockDim.y * gridDim.y;
             const unsigned int initialX = blockIdx.x * blockDim.x + threadIdx.x;
             const unsigned int initialY = blockIdx.y * blockDim.y + threadIdx.y;
-            unsigned short x = radius, y = radius;
-            unsigned short sideLength = radius * 2;
+            unsigned x = radius, y = radius;
+            unsigned sideLength = radius * 2;
             for (unsigned row = initialX; row < sideLength; row += strideX) {
                 int yValueSquared = (row - y) * (row - y);
                 for (unsigned col = initialY; col < sideLength; col += strideY) {

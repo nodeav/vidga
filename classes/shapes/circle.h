@@ -9,11 +9,6 @@
 #include "../../interfaces/shape/shape.h"
 
 namespace vidga {
-    struct gpuCircle {
-        float4 color;
-        unsigned radius, x, y;
-    };
-
     class circle : public shape {
     public:
         circle();
