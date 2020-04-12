@@ -8,7 +8,7 @@
 #include "cudaCircles.cuh"
 
 namespace vidga {
-    std::vector<circle> &simpleIndividual::getShapesMut() {
+    std::vector<circle> &simpleIndividual::getShapes() {
         return circles;
     }
 
@@ -16,6 +16,7 @@ namespace vidga {
                                        ucoor_t xMax, ucoor_t yMax) {
         width = xMax;
         height = yMax;
+        minMapRadius = sideLengthMin;
         circles.reserve(size);
         for (auto i = 0; i < size; i++) {
             circle c;
@@ -25,9 +26,9 @@ namespace vidga {
     }
 
     void simpleIndividual::draw(float3 *canvas, float **map) const {
-        int i = 0;
         for (auto const &circle : circles) {
-            cuda::drawUsingMapHostFn(canvas, width, height, map, circle);
+            auto idx = circle.radius - minMapRadius;
+            cuda::drawUsingMapHostFn(canvas, width, height, map[idx], circle);
         }
     }
 
@@ -43,9 +44,9 @@ namespace vidga {
     simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
                                 ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
         auto dst = std::make_shared<simpleIndividual>(circles.size(), sideLengthMin, sideLengthMax, xMax, yMax);
-        auto &dstShapes = dst->getShapesMut();
+        auto &dstShapes = dst->getShapes();
 
-        auto &srcShapes = src->getShapesMut();
+        auto &srcShapes = src->getShapes();
         dstShapes.reserve(src->getShapes().size());
 
         // We only need 1 bit of randomness per decision
@@ -77,6 +78,8 @@ namespace vidga {
 
     void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap) {
         draw(canvas, circlesMap);
+//        cudaDeviceSynchronize();
+
 //        cv::absdiff(target, canvas, circlesMap);
 //        cv::Scalar newScore = cv::sum(circlesMap);
 //        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /

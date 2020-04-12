@@ -15,10 +15,12 @@ namespace vidga {
     class simplePopulation {
     public:
         simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize,
-                         float minSizeFactor=0.001, float maxSizeFactor=0.2);
+                         float minSizeFactor = 0.001, float maxSizeFactor = 0.2);
 
         std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
+
         void sortByScore(float3 *target);
+
         std::shared_ptr<simplePopulation> nextGeneration();
 
     private:
@@ -29,11 +31,15 @@ namespace vidga {
     public:
         uint16_t getIndividualSize() const;
 
+        void drawBest(float3 *canvas) const;
+
     private:
         ThreadPool threadPool{24};
         std::vector<std::unique_ptr<cv::Mat>> canvasPool;
         std::vector<std::unique_ptr<cv::Mat>> scratchCanvasPool;
-        void addIndividual(std::shared_ptr<simpleIndividual> individual);
+
+        void addIndividual(const std::shared_ptr<simpleIndividual> &individual);
+
         float **circlesMap;
     };
 }

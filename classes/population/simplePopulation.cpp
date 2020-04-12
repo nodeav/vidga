@@ -9,10 +9,10 @@ namespace vidga {
         imgResY = yRes;
 
         auto avg = (xRes + yRes) / 2;
-        minSideLen = static_cast<ucoor_t>(minSizeFactor * avg);
+        minSideLen = std::max(1u, static_cast<ucoor_t>(minSizeFactor * avg));
         maxSideLen = static_cast<ucoor_t>(maxSizeFactor * avg);
 
-        vidga::cuda::initCircleMaps(minSideLen, maxSideLen, circlesMap);
+        vidga::cuda::initCircleMaps(minSideLen, maxSideLen, &circlesMap);
 
         individualSize = individualSize_;
 
@@ -40,14 +40,17 @@ namespace vidga {
         return individuals;
     }
 
+    int n = 0;
+
     void simplePopulation::sortByScore(float3 *target) {
         static std::vector<std::future<void>> futures{individuals.size()};
         for (auto i = 0; i < individuals.size(); i++) {
             futures[i] = threadPool.enqueue([&](int i) {
-                static thread_local cv::Mat canvas(imgResY, imgResX, CV_8UC3, cv::Scalar{255, 255, 255});
-                static thread_local cv::Mat scratchCanvas(imgResY, imgResX, CV_32F);;
+                thread_local auto canvas = cuda::getZeroedGpuMat(imgResX, imgResY);
+                thread_local int q = n++;
+                printf("q is %d", q);
                 individuals[i]->calcAndSetScore(target, canvas, circlesMap);
-                canvas.setTo(cv::Scalar({255, 255, 255}));
+                cuda::setGpuMatTo(canvas, imgResX, imgResY, 0.f);
             }, i);
         }
 
@@ -80,8 +83,12 @@ namespace vidga {
         return result;
     }
 
-    void simplePopulation::addIndividual(std::shared_ptr<simpleIndividual> individual) {
+    void simplePopulation::addIndividual(const std::shared_ptr<simpleIndividual> &individual) {
         individuals.push_back(individual);
+    }
+
+    void simplePopulation::drawBest(float3 *canvas) const {
+        individuals[0]->draw(canvas, circlesMap);
     }
 
 }

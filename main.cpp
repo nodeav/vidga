@@ -8,14 +8,14 @@
 
 #include <chrono>
 #include <mutex>
-#include <cuda/cudaCircles.cuh>
+
+#include "cudaCircles.cuh"
 
 using namespace vidga;
 using namespace std::chrono_literals;
 
 int main() {
-    float** gpuBuf;
-    initCircleMaps(15, 22, gpuBuf);
+    float **gpuBuf;
     cv::waitKey(0);
     // Load and display target image
 //     auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
@@ -27,45 +27,72 @@ int main() {
     std::cout << "rows: " << img.rows << " and cols " << img.cols << std::endl;
     auto xRes = img.cols;
     auto yRes = img.rows;
-    auto targetCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
+    auto numSubpixels = 3 * xRes * yRes;
+
+//    auto targetCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
     const std::string targetWinName = "<= TARGET =>";
     cv::namedWindow(targetWinName);
     cv::imshow(targetWinName, img);
 
+    cv::Mat imgForGpu;
+    img.convertTo(imgForGpu, CV_32FC3, 1 / 255.f);
+    float3 *imgGpu = cuda::getZeroedGpuMat(xRes, yRes);
+    cudaMemcpy(imgGpu, imgForGpu.data, numSubpixels * sizeof(float), cudaMemcpyHostToDevice);
+
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(60, xRes, yRes, 250, 0.001, 0.1);
+    auto population = std::make_shared<simplePopulation>(1, xRes, yRes, 1, 0.001, 0.1);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
-    auto canvas1 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
-    population->getIndividuals()[0]->draw(canvas1);
-    cv::imshow(firstItrWinName, canvas1);
+    float3 *canvas1 = cuda::getZeroedGpuMat(xRes, yRes);
+    population->drawBest(canvas1);
+
+    auto cpuCanvasData1 = new float[numSubpixels]();
+    cudaDeviceSynchronize();
+    cudaMemcpy(cpuCanvasData1, canvas1, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
+    auto canvas1Cpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasData1);
+    cv::imshow(firstItrWinName, canvas1Cpu);
 
     auto generations = 250000000;
     std::mutex mutex;
 
     auto bestPop = population;
 #ifndef __APPLE__
-    auto drawThread = std::thread([&population, &bestPop, &xRes, &yRes, &mutex]() {
+    auto drawThread = std::thread([&]() {
         const std::string current = "current";
         cv::namedWindow(current);
         const std::string best = "best";
         cv::namedWindow(best);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma ide diagnostic ignored "EndlessLoop"
+        float3 *canvasBest, *canvasCurr;
         while (true) {
             auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
             auto canvas2 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
-
+            cv::Mat canvasBestCpu, canvasCurrCpu;
             {
                 std::lock_guard<std::mutex> lock(mutex);
-                bestPop->getIndividuals()[0]->draw(canvas);
-                population->getIndividuals()[0]->draw(canvas2);
+
+                canvasBest = cuda::getZeroedGpuMat(xRes, yRes);
+                bestPop->drawBest(canvasBest);
+                auto cpuCanvasDataBest = new float[numSubpixels]();
+                cudaDeviceSynchronize();
+                cudaMemcpy(cpuCanvasDataBest, canvasBest, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
+                canvasBestCpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasDataBest);
+
+                canvasCurr = cuda::getZeroedGpuMat(xRes, yRes);
+                population->drawBest(canvasCurr);
+                auto cpuCanvasDataCurr = new float[numSubpixels]();
+                cudaDeviceSynchronize();
+                cudaMemcpy(cpuCanvasDataCurr, canvasCurr, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
+                canvasCurrCpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasDataCurr);
+
             }
 
-            cv::imshow(best, canvas);
-            cv::imshow(current, canvas2);
-            cv::waitKey(1000);
+            cv::imshow(best, canvasBestCpu);
+            cv::imshow(current, canvasCurrCpu);
+            cv::waitKey(5000);
         }
 #pragma clang diagnostic pop
     });
@@ -86,7 +113,7 @@ int main() {
     statusThread.detach();
 
     for (i = 0; i < generations; i++) {
-        population->sortByScore(img);
+        population->sortByScore(imgGpu);
 
         if (population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
             bestPop = population;

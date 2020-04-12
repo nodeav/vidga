@@ -5,15 +5,17 @@
 //#include "opencv2/core/mat.hpp"
 namespace vidga {
     namespace cuda {
-        constexpr unsigned colRow2idx(unsigned col, unsigned row, unsigned sideLength) {
+        __device__ constexpr unsigned colRow2idx(unsigned col, unsigned row, unsigned sideLength) {
             return row * sideLength + col;
         }
 
         __device__ __always_inline void blendColors(float3 *pixel, float4 color, float modifier) {
             float finalModifier = color.w * modifier;
-            pixel->x = max(color.x * finalModifier + pixel->x, 1.f);
-            pixel->y = max(color.y * finalModifier + pixel->y, 1.f);
-            pixel->z = max(color.z * finalModifier + pixel->z, 1.f);
+//            printf("\tbefore: {r: %f, g: %f, b: %f}\n", pixel->x, pixel->y, pixel->z);
+            pixel->x = min(color.x * finalModifier + pixel->x, 1.f);
+            pixel->y = min(color.y * finalModifier + pixel->y, 1.f);
+            pixel->z = min(color.z * finalModifier + pixel->z, 1.f);
+//            printf("\tafter: {r: %f, g: %f, b: %f}\n\n", pixel->x, pixel->y, pixel->z);
         }
 
         __global__ void genSmoothCircleMap(float *buffer, unsigned short radius) {
@@ -53,6 +55,7 @@ namespace vidga {
                     unsigned idx = colRow2idx(col, row, sideLength);
                     float3 *pixel = &buffer[idx];
                     float modifier = map[idx];
+//                    printf("rendering color at row %u, col %u, idx is %u\n", row, col, idx);
                     blendColors(pixel, c.color, modifier);
                 }
             }
@@ -60,23 +63,36 @@ namespace vidga {
 
         void
         drawUsingMapHostFn(float3 *buffer, unsigned width, unsigned height, const float *map, circle c) {
-            dim3 threads(8, 8, 1);
+            dim3 threads(1, 1, 1);
             dim3 blocks(1, 1, 1);
             drawUsingMap<<<blocks, threads>>>(buffer, width, height, map, c);
         }
 
-        void initCircleMaps(unsigned minRadius, unsigned maxRadius, float **gpuBuffers) {
+        void initCircleMaps(unsigned minRadius, unsigned maxRadius, float ***gpuBuffers) {
             unsigned numCircles = maxRadius - minRadius + 1;
-            gpuBuffers = static_cast<float **>(malloc(numCircles * sizeof(float *)));
+            *gpuBuffers = static_cast<float **>(malloc(numCircles * sizeof(float *)));
             for (auto i = minRadius; i <= maxRadius; i++) {
                 auto idx = i - minRadius;
                 unsigned memToAlloc = 4 * i * i * sizeof(float *);
-                float *circleBuf = gpuBuffers[idx];
-                cudaMalloc(&circleBuf, memToAlloc);
-                genSmoothCircleMap<<<32, 32>>>(circleBuf, i);
+                float **circleBuf = &(*gpuBuffers)[idx];
+                cudaMalloc(circleBuf, memToAlloc);
+                genSmoothCircleMap<<<32, 32>>>(*circleBuf, i);
             }
             cudaDeviceSynchronize();
 
+        }
+
+        void setGpuMatTo(float3 *mat, unsigned width, unsigned height, float val) {
+            auto size = width * height * sizeof(float) * 3;
+            cudaMemset(mat, val, size);
+        }
+
+        float3 *getZeroedGpuMat(unsigned width, unsigned height) {
+            auto size = width * height * sizeof(float) * 3;
+            float3 *ret;
+            cudaMalloc(&ret, size);
+            setGpuMatTo(ret, width, height, 0.f);
+            return ret;
         }
     }
 }

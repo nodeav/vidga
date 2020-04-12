@@ -24,9 +24,9 @@ namespace vidga {
     public:
         simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
 
-        std::vector<circle> &getShapes() const override;
+//        std::vector<circle> &getShapes() const override;
 
-        std::vector<circle> &getShapesMut() override;
+        std::vector<circle> &getShapes() override;
 
         void draw(float3 *canvas, float **map) const;
 
@@ -42,6 +42,7 @@ namespace vidga {
         unsigned width, height;
         float score = 4;
 
+        ucoor_t minMapRadius;
     };
 }
 
