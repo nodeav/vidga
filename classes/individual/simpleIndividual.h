@@ -22,7 +22,8 @@
 namespace vidga {
     class simpleIndividual : individual {
     public:
-        simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
+        simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax,
+                         ucoor_t yMax, bool setRandom = false);
         const std::vector<std::shared_ptr<circle>>& getShapes() const override;
         std::vector<std::shared_ptr<circle>>& getShapesMut() override;
         void draw(cv::Mat& canvas) const;

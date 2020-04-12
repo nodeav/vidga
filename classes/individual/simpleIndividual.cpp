@@ -14,12 +14,14 @@ namespace vidga {
         return shapes;
     }
 
-    simpleIndividual::simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax,
-                                       ucoor_t xMax, ucoor_t yMax) {
+    simpleIndividual::simpleIndividual(size_t size, ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax,
+                                       ucoor_t yMax, bool setRandom) {
         shapes.reserve(size);
         for (auto i = 0; i < size; i++) {
             auto c = std::make_shared<circle>();
-            c->setRandomEverything(sideLengthMin, sideLengthMax, xMax, yMax);
+            if (setRandom) {
+                c->setRandomEverything(sideLengthMin, sideLengthMax, xMax, yMax);
+            }
             shapes.push_back(c);
         }
     }
