@@ -40,15 +40,11 @@ namespace vidga {
         return individuals;
     }
 
-    int n = 0;
-
     void simplePopulation::sortByScore(float3 *target) {
         static std::vector<std::future<void>> futures{individuals.size()};
         for (auto i = 0; i < individuals.size(); i++) {
-            futures[i] = threadPool.enqueue([&](int i) {
+            futures[i] = threadPool->enqueue([&](int i) {
                 thread_local auto canvas = cuda::getZeroedGpuMat(imgResX, imgResY);
-                thread_local int q = n++;
-                printf("q is %d", q);
                 individuals[i]->calcAndSetScore(target, canvas, circlesMap);
                 cuda::setGpuMatTo(canvas, imgResX, imgResY, 0.f);
             }, i);
@@ -66,7 +62,7 @@ namespace vidga {
     std::shared_ptr<simplePopulation> simplePopulation::nextGeneration() {
         auto topIndividualsCutoff = static_cast<int>(individuals.size() * 0.2);
         auto result = std::make_shared<simplePopulation>(0, imgResX, imgResY, individualSize);
-
+        result->threadPool = std::move(threadPool);
         auto getRandomIndex = [&]() {
             return genRandom(0, topIndividualsCutoff);
         };
