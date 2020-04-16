@@ -36,7 +36,7 @@ namespace vidga {
         return (bits >> index) & 1;
     };
 
-    const auto genRandomInt() {
+    auto genRandomInt() {
         return genRandom(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     }
 
@@ -78,7 +78,7 @@ namespace vidga {
 
     void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap) {
         draw(canvas, circlesMap);
-//        cudaDeviceSynchronize();
+        cudaDeviceSynchronize();
 
 //        cv::absdiff(target, canvas, circlesMap);
 //        cv::Scalar newScore = cv::sum(circlesMap);

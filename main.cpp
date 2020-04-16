@@ -36,15 +36,15 @@ int main() {
 
     cv::Mat imgForGpu;
     img.convertTo(imgForGpu, CV_32FC3, 1 / 255.f);
-    float3 *imgGpu = cuda::getZeroedGpuMat(xRes, yRes);
+    float3 *imgGpu = cuda::getWhiteGpuMat(xRes, yRes);
     cudaMemcpy(imgGpu, imgForGpu.data, numSubpixels * sizeof(float), cudaMemcpyHostToDevice);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(1, xRes, yRes, 1, 0.001, 0.1);
+    auto population = std::make_shared<simplePopulation>(30, xRes, yRes, 100);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
-    float3 *canvas1 = cuda::getZeroedGpuMat(xRes, yRes);
+    float3 *canvas1 = cuda::getWhiteGpuMat(xRes, yRes);
     population->drawBest(canvas1);
 
     auto cpuCanvasData1 = new float[numSubpixels]();
@@ -66,26 +66,28 @@ int main() {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma ide diagnostic ignored "EndlessLoop"
-        float3 *canvasBest, *canvasCurr;
+        auto canvasBestGpu = cuda::getWhiteGpuMat(xRes, yRes);
+        auto canvasCurrGpu = cuda::getWhiteGpuMat(xRes, yRes);
         while (true) {
             auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
             auto canvas2 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
+
             cv::Mat canvasBestCpu, canvasCurrCpu;
             {
                 std::lock_guard<std::mutex> lock(mutex);
 
-                canvasBest = cuda::getZeroedGpuMat(xRes, yRes);
-                bestPop->drawBest(canvasBest);
+                cuda::setGpuMatTo(canvasBestGpu, xRes, yRes, 1.f);
+                bestPop->drawBest(canvasBestGpu);
                 auto cpuCanvasDataBest = new float[numSubpixels]();
                 cudaDeviceSynchronize();
-                cudaMemcpy(cpuCanvasDataBest, canvasBest, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
+                cudaMemcpy(cpuCanvasDataBest, canvasBestGpu, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
                 canvasBestCpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasDataBest);
 
-                canvasCurr = cuda::getZeroedGpuMat(xRes, yRes);
-                population->drawBest(canvasCurr);
+                cuda::setGpuMatTo(canvasCurrGpu, xRes, yRes, 1.f);
+                population->drawBest(canvasCurrGpu);
                 auto cpuCanvasDataCurr = new float[numSubpixels]();
                 cudaDeviceSynchronize();
-                cudaMemcpy(cpuCanvasDataCurr, canvasCurr, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
+                cudaMemcpy(cpuCanvasDataCurr, canvasCurrGpu, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
                 canvasCurrCpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasDataCurr);
 
             }

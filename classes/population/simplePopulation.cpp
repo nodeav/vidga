@@ -44,7 +44,7 @@ namespace vidga {
         static std::vector<std::future<void>> futures{individuals.size()};
         for (auto i = 0; i < individuals.size(); i++) {
             futures[i] = threadPool->enqueue([&](int i) {
-                thread_local auto canvas = cuda::getZeroedGpuMat(imgResX, imgResY);
+                thread_local auto canvas = cuda::getWhiteGpuMat(imgResX, imgResY);
                 individuals[i]->calcAndSetScore(target, canvas, circlesMap);
                 cuda::setGpuMatTo(canvas, imgResX, imgResY, 0.f);
             }, i);

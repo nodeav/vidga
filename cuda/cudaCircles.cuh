@@ -5,7 +5,7 @@ namespace vidga {
         void initCircleMaps(unsigned minRadius, unsigned maxRadius, float ***gpuBuffers);
         void drawUsingMapHostFn(float3 *buffer, unsigned width, unsigned height, const float *map, circle c);
         void setGpuMatTo(float3* mat, unsigned width, unsigned height, float val);
-        float3 *getZeroedGpuMat(unsigned width, unsigned height);
+        float3 *getWhiteGpuMat(unsigned width, unsigned height);
 
         class cudaCircles {
         private:
