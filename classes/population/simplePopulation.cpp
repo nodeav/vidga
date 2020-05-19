@@ -3,7 +3,7 @@
 
 namespace vidga {
     simplePopulation::simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize_,
-                                       float minSizeFactor, float maxSizeFactor) {
+                                       bool skipCircleMapsInit, float minSizeFactor, float maxSizeFactor) {
 
         imgResX = xRes;
         imgResY = yRes;
@@ -12,23 +12,16 @@ namespace vidga {
         minSideLen = std::max(1u, static_cast<ucoor_t>(minSizeFactor * avg));
         maxSideLen = static_cast<ucoor_t>(maxSizeFactor * avg);
 
-        vidga::cuda::initCircleMaps(minSideLen, maxSideLen, &circlesMap);
+        if (!skipCircleMapsInit) {
+            vidga::cuda::initCircleMaps(minSideLen, maxSideLen, &circlesMap);
+        }
 
         individualSize = individualSize_;
 
-/*        std::cout << "Using: minSideLen=" << minSideLen <<
-		     ", maxSideLen =" << maxSideLen <<
-		     ", with " << individualSize << " individuals" << std::endl;
-*/
         individuals.reserve(popSize);
         for (auto i = 0; i < popSize; i++) {
             auto individual = std::make_shared<simpleIndividual>(individualSize, minSideLen, maxSideLen, xRes, yRes);
             individuals.push_back(individual);
-        }
-
-        for (auto i = 0; i < canvasPool.size(); i++) {
-            canvasPool[i] = std::make_unique<cv::Mat>(yRes, xRes, CV_8UC3, cv::Scalar{255, 255, 255});
-            scratchCanvasPool[i] = std::make_unique<cv::Mat>(yRes, xRes, CV_32F);
         }
     }
 
@@ -63,6 +56,7 @@ namespace vidga {
         auto topIndividualsCutoff = static_cast<int>(individuals.size() * 0.2);
         auto result = std::make_shared<simplePopulation>(0, imgResX, imgResY, individualSize);
         result->threadPool = std::move(threadPool);
+        result->circlesMap = circlesMap;
         auto getRandomIndex = [&]() {
             return genRandom(0, topIndividualsCutoff);
         };

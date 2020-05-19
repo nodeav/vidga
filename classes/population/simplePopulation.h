@@ -15,7 +15,7 @@ namespace vidga {
     class simplePopulation {
     public:
         simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize,
-                         float minSizeFactor = 0.001, float maxSizeFactor = 0.2);
+                         bool skipCircleMapsInit = true, float minSizeFactor = 0.001, float maxSizeFactor = 0.2);
 
         std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
 
@@ -35,8 +35,6 @@ namespace vidga {
 
     private:
         std::unique_ptr<ThreadPool> threadPool = std::make_unique<ThreadPool>(24);
-        std::vector<std::unique_ptr<cv::Mat>> canvasPool;
-        std::vector<std::unique_ptr<cv::Mat>> scratchCanvasPool;
 
         void addIndividual(const std::shared_ptr<simpleIndividual> &individual);
 

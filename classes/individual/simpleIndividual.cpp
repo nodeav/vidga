@@ -26,6 +26,8 @@ namespace vidga {
     }
 
     void simpleIndividual::draw(float3 *canvas, float **map) const {
+//        cuda::drawManyUsingMapHostFn(canvas, width, height, map, minMapRadius, circles.data(), circles.size());
+//        cudaDeviceSynchronize();
         for (auto const &circle : circles) {
             auto idx = circle.radius - minMapRadius;
             cuda::drawUsingMapHostFn(canvas, width, height, map[idx], circle);
@@ -44,6 +46,13 @@ namespace vidga {
     simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
                                 ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
         auto dst = std::make_shared<simpleIndividual>(circles.size(), sideLengthMin, sideLengthMax, xMax, yMax);
+
+        dst->targetCopied = true;
+        dst->targetCPU = targetCPU;
+        dst->canvasCPU = canvasCPU;
+        dst->targetMat = targetMat;
+        dst->canvasMat = canvasMat;
+
         auto &dstShapes = dst->getShapes();
 
         auto &srcShapes = src->getShapes();
@@ -76,14 +85,32 @@ namespace vidga {
         return dst;
     }
 
-    void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap) {
-        draw(canvas, circlesMap);
-        cudaDeviceSynchronize();
+#define gpu_check(e)    \
+if (e != cudaSuccess) { \
+    printf("cuda error - %d on %s:%d\n", e, __FILE__, __LINE__); \
+    }
 
-//        cv::absdiff(target, canvas, circlesMap);
-//        cv::Scalar newScore = cv::sum(circlesMap);
-//        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
-//                                   (canvas.total() * canvas.channels()));
+    void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap) {
+        cv::Mat scratchPad(height, width, CV_32FC3);
+        auto numSubpixels = width * height * 3;
+
+        if (!targetCopied) {
+            targetCPU = new float[numSubpixels]();
+            canvasCPU = new float[numSubpixels]();
+            gpu_check(cudaMemcpy(targetCPU, target, numSubpixels*sizeof(float), cudaMemcpyDeviceToHost));
+            targetMat = cv::Mat(height, width, CV_32FC3, targetCPU);
+            targetCopied = true;
+        }
+        draw(canvas, circlesMap);
+
+        gpu_check(cudaMemcpy(canvasCPU, canvas, numSubpixels*sizeof(float), cudaMemcpyDeviceToHost));
+        canvasMat = cv::Mat(height, width, CV_32FC3, canvasCPU);
+        gpu_check(cudaDeviceSynchronize());
+
+        cv::absdiff(targetMat, canvasMat, scratchPad);
+        cv::Scalar newScore = cv::sum(scratchPad);
+        score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
+                                   (targetMat.total() * targetMat.channels()));
     }
 
     float simpleIndividual::getScore() const {

@@ -43,6 +43,11 @@ namespace vidga {
         float score = 4;
 
         ucoor_t minMapRadius;
+
+
+        bool targetCopied{false};
+        float *targetCPU, *canvasCPU;
+        cv::Mat targetMat, canvasMat;
     };
 }
 

@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <cuda_profiler_api.h>
 
 #include "cudaCircles.cuh"
 
@@ -40,7 +41,7 @@ int main() {
     cudaMemcpy(imgGpu, imgForGpu.data, numSubpixels * sizeof(float), cudaMemcpyHostToDevice);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(30, xRes, yRes, 100);
+    auto population = std::make_shared<simplePopulation>(40, xRes, yRes, 250, false);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -53,7 +54,7 @@ int main() {
     auto canvas1Cpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasData1);
     cv::imshow(firstItrWinName, canvas1Cpu);
 
-    auto generations = 250000000;
+    auto generations = 100;
     std::mutex mutex;
 
     auto bestPop = population;
@@ -115,6 +116,7 @@ int main() {
     statusThread.detach();
 
     for (i = 0; i < generations; i++) {
+        cudaProfilerStart();
         population->sortByScore(imgGpu);
 
         if (population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
@@ -140,7 +142,7 @@ int main() {
     population->getIndividuals()[0]->draw(canvas2);
     cv::imshow(best, canvas2);
 #endif
-    cv::waitKey();
-
+//    cv::waitKey();
+    cudaProfilerStop();
     return 0;
 }
