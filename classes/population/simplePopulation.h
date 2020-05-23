@@ -30,7 +30,7 @@ namespace vidga {
         uint16_t getIndividualSize() const;
 
     private:
-        ThreadPool threadPool{24};
+        std::unique_ptr<ThreadPool> threadPool = std::make_unique<ThreadPool>(24);
         std::vector<std::unique_ptr<cv::Mat>> canvasPool;
         std::vector<std::unique_ptr<cv::Mat>> scratchCanvasPool;
         void addIndividual(std::shared_ptr<simpleIndividual> individual);

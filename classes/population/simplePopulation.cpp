@@ -7,7 +7,7 @@
 namespace vidga {
 
     simplePopulation::simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize_,
-                                              float minSizeFactor, float maxSizeFactor) {
+                                       float minSizeFactor, float maxSizeFactor) {
 
         imgResX = xRes;
         imgResY = yRes;
@@ -22,7 +22,8 @@ namespace vidga {
 */
         individuals.reserve(popSize);
         for (auto i = 0; i < popSize; i++) {
-            auto individual = std::make_shared<simpleIndividual>(individualSize, minSideLen, maxSideLen, xRes, yRes);
+            auto individual = std::make_shared<simpleIndividual>(individualSize, minSideLen, maxSideLen, xRes, yRes,
+                                                                 true);
             individuals.push_back(individual);
         }
 
@@ -43,7 +44,7 @@ namespace vidga {
     void simplePopulation::sortByScore(cv::Mat &target) {
         static std::vector<std::future<void>> futures{individuals.size()};
         for (auto i = 0; i < individuals.size(); i++) {
-            futures[i] = threadPool.enqueue([&](int i) {
+            futures[i] = threadPool->enqueue([&](int i) {
                 static thread_local cv::Mat canvas(imgResY, imgResX, CV_8UC3, cv::Scalar{255, 255, 255});
                 static thread_local cv::Mat scratchCanvas(imgResY, imgResX, CV_32F);;
                 individuals[i]->calcAndSetScore(target, canvas, scratchCanvas);
@@ -51,7 +52,7 @@ namespace vidga {
             }, i);
         }
 
-        for (auto& future : futures) {
+        for (auto &future : futures) {
             future.wait();
         }
 
@@ -63,7 +64,7 @@ namespace vidga {
     std::shared_ptr<simplePopulation> simplePopulation::nextGeneration() {
         auto topIndividualsCutoff = static_cast<int>(individuals.size() * 0.2);
         auto result = std::make_shared<simplePopulation>(0, imgResX, imgResY, individualSize);
-
+        result->threadPool = std::move(threadPool);
         auto getRandomIndex = [&]() {
             return genRandom(0, topIndividualsCutoff);
         };
@@ -72,7 +73,7 @@ namespace vidga {
             auto randIdx1 = getRandomIndex();
             auto randIdx2 = getRandomIndex();
             auto newIndividual = individuals[randIdx1]->randMerge(individuals[randIdx2],
-                    minSideLen, maxSideLen, imgResX, imgResY);
+                                                                  minSideLen, maxSideLen, imgResX, imgResY);
 
             result->addIndividual(newIndividual);
         }
