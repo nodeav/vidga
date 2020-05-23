@@ -15,8 +15,8 @@ using namespace std::chrono_literals;
 int main() {
     // Load and display target image
 //     auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
-    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
-//    auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
+   auto img = cv::imread("./target.png");
+    // auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
 //    auto img = cv::imread("/home/nadav/Pictures/vlcsnap-2020-03-27-00h45m02s240.png"); // 4K!!
 //    auto img = cv::imread("/home/nadav/Pictures/ratatouille.640x268.2.png");
 
@@ -37,7 +37,7 @@ int main() {
     population->getIndividuals()[0]->draw(canvas1);
     cv::imshow(firstItrWinName, canvas1);
 
-    auto generations = 250000000;
+    auto generations = 5000;
     std::mutex mutex;
 
     auto bestPop = population;
@@ -107,6 +107,9 @@ int main() {
     population->getIndividuals()[0]->draw(canvas2);
     cv::imshow(best, canvas2);
 #endif
+    auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
+    bestPop->getIndividuals()[0]->draw(canvas);
+    cv::imwrite("./best.png", canvas);
     cv::waitKey();
 
     return 0;
