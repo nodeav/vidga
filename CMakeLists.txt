@@ -27,7 +27,9 @@ add_executable(${PROJECT_NAME}
         classes/population/simplePopulation.cpp
         classes/population/simplePopulation.h
         classes/renderers/opencvRenderer.cpp
-        classes/renderers/opencvRenderer.h util.h)
+        classes/renderers/opencvRenderer.h util.h
+        classes/SerDes/SerDes.cpp
+        classes/SerDes/SerDes.h)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} UTIL Threads::Threads)
 
