@@ -29,7 +29,7 @@ int main() {
     cv::imshow(targetWinName, img);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(30, xRes, yRes, 120);
+    auto population = std::make_shared<simplePopulation>(30, xRes, yRes, 500);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -37,7 +37,7 @@ int main() {
     population->getIndividuals()[0]->draw(canvas1);
     cv::imshow(firstItrWinName, canvas1);
 
-    auto generations = 5000;
+    auto generations = 500000000;
     std::mutex mutex;
 
     auto bestPop = population;

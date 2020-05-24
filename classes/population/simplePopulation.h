@@ -15,7 +15,7 @@ namespace vidga {
     class simplePopulation {
     public:
         simplePopulation(uint32_t popSize, uint32_t xRes, uint32_t yRes, uint16_t individualSize,
-                         float minSizeFactor=0.001, float maxSizeFactor=0.2);
+                         float minSizeFactor=0, float maxSizeFactor=0.5);
 
         std::vector<std::shared_ptr<simpleIndividual>> getIndividuals() const;
         void sortByScore(cv::Mat &target);

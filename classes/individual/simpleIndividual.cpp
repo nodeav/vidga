@@ -77,6 +77,7 @@ namespace vidga {
             }
             shapes.push_back(c);
         }
+        sortShapes();
     }
 
     void simpleIndividual::draw(cv::Mat &canvas) const {
@@ -102,36 +103,48 @@ namespace vidga {
     std::shared_ptr<simpleIndividual>
     simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
                                 ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
-        auto dst = std::make_shared<simpleIndividual>(shapes.size(), sideLengthMin, sideLengthMax, xMax, yMax);
+        auto dst = std::make_shared<simpleIndividual>(0, sideLengthMin, sideLengthMax, xMax, yMax);
         auto &dstShapes = dst->getShapesMut();
 
         auto &srcShapes = src->getShapesMut();
         dstShapes.reserve(src->getShapes().size());
 
         // We only need 1 bit of randomness per decision
-        const auto bitsPerInt = sizeof(int) * 8;
-        const auto intsOfRandomness = static_cast<int>(dstShapes.size() / bitsPerInt + 1);
+        // const auto bitsPerInt = sizeof(int) * 8;
+        // const auto intsOfRandomness = static_cast<int>(dstShapes.size() / bitsPerInt + 1);
 
-        for (auto i = 0; i < intsOfRandomness; i++) {
-            auto oneInt = genRandomInt();
-            auto idx = i * bitsPerInt;
-            for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
-                std::shared_ptr<circle> ptr;
-                if (getBit(oneInt, j)) {
-                    ptr = srcShapes[idx];
-                } else {
-                    ptr = shapes[idx];
-                }
-                *dstShapes[idx] = *ptr;
-                dstShapes[idx]->mutate(0.5, xMax, yMax, sideLengthMin, sideLengthMax);
+        // for (auto i = 0; i < intsOfRandomness; i++) {
+        //     auto oneInt = genRandomInt();
+        //     auto idx = i * bitsPerInt;
+        //     for (int j = 0; j < bitsPerInt && idx < dstShapes.size(); j++, idx++) {
+        //         std::shared_ptr<circle> ptr;
+        //         if (getBit(oneInt, j)) {
+        //             ptr = srcShapes[idx];
+        //         } else {
+        //             ptr = shapes[idx];
+        //         }
+        //         *dstShapes[idx] = *ptr;
+        //         dstShapes[idx]->mutate(0.1, xMax, yMax, sideLengthMin, sideLengthMax);
 
-                if (genRandom(0, 50) == 1) {
-                    auto idx1 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
-                    auto idx2 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
-                    std::iter_swap(dstShapes.begin() + idx1, dstShapes.begin() + idx2);
-                }
+        //         if (genRandom(0, 50) == 1) {
+        //             auto idx1 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
+        //             auto idx2 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
+        //             std::iter_swap(dstShapes.begin() + idx1, dstShapes.begin() + idx2);
+        //         }
+        //     }
+        // }
+
+        for (int i=0; i < srcShapes.size(); i++) {
+            if (genRandom(0, 100) < 50) {
+                dstShapes.push_back(std::make_shared<circle>(*shapes[i]));
+            } else {
+                dstShapes.push_back(std::make_shared<circle>(*srcShapes[i]));
             }
+
+            dstShapes[i]->mutate(0.1, xMax, yMax, sideLengthMin, sideLengthMax);
         }
+
+        dst->sortShapes();
         return dst;
     }
 
@@ -148,5 +161,9 @@ namespace vidga {
 
     float simpleIndividual::getScore() const {
         return score;
+    }
+
+    void simpleIndividual::sortShapes() {
+        std::sort(shapes.begin(), shapes.end(), [](std::shared_ptr<circle> c1, std::shared_ptr<circle> c2){ return c1->getRadius() > c2->getRadius();});
     }
 }

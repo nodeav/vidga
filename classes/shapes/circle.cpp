@@ -18,6 +18,10 @@ namespace vidga {
         return color;
     }
 
+    const ucoor_t circle::getRadius() const {
+        return radius;
+    }
+
     void circle::setHeight(ucoor_t newHeight) {
         radius = newHeight;
     }
@@ -55,6 +59,12 @@ namespace vidga {
 
     circle::circle() : circle({0, 0}, 0) {
 
+    }
+
+    circle::circle(const circle& c) : shape(c.center) {
+        this->center = c.center;
+        this->radius = c.radius;
+        this->color = c.color;
     }
 
     coors circle::getCenter() const {

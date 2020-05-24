@@ -12,6 +12,7 @@ namespace vidga {
     public:
         circle();
         circle(coors center_, ucoor_t radius_);
+        circle(const circle&);
         explicit circle(ucoor_t radius_);
         void mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMin, ucoor_t sizeMax) override;
         circle& operator=(const circle &rhs) noexcept;
@@ -21,6 +22,7 @@ namespace vidga {
         ucoor_t getHeight() const override;
         coors getCenter() const override;
         bgr_color_t getColor() const override;
+        const ucoor_t getRadius() const;
 
         void setWidth(ucoor_t newWidth) override;
         void setHeight(ucoor_t newHeight) override;

@@ -33,6 +33,8 @@ namespace vidga {
         float getScore() const;
 
     private:
+        void sortShapes();
+
         std::vector<std::shared_ptr<circle>> shapes;
         float score = 4;
 
