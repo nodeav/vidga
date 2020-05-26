@@ -150,13 +150,13 @@ namespace vidga {
 
     void simpleIndividual::calcAndSetScore(cv::Mat &target, cv::Mat &canvas, cv::Mat &dst) {
         draw(canvas);
-        // cv::absdiff(target, canvas, dst);
-        // cv::Scalar newScore = cv::sum(dst);
-        // score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
-        //                            (canvas.total() * canvas.channels()));
-
-        cv::Scalar mssim = getMSSIM(target, canvas);
-        score = 1.0f - static_cast<float>((mssim.val[0] + mssim.val[1] + mssim.val[2]) / 3);
+         cv::absdiff(target, canvas, dst);
+         cv::Scalar newScore = cv::sum(dst);
+         score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
+                                    (canvas.total() * canvas.channels()));
+//
+//        cv::Scalar mssim = getMSSIM(target, canvas);
+//        score = 1.0f - static_cast<float>((mssim.val[0] + mssim.val[1] + mssim.val[2]) / 3);
     }
 
     float simpleIndividual::getScore() const {
