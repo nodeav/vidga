@@ -14,22 +14,26 @@ using namespace std::chrono_literals;
 
 int main() {
     // Load and display target image
-//     auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
-   auto img = cv::imread("./target.png");
-    // auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
-//    auto img = cv::imread("/home/nadav/Pictures/vlcsnap-2020-03-27-00h45m02s240.png"); // 4K!!
-//    auto img = cv::imread("/home/nadav/Pictures/ratatouille.640x268.2.png");
+//    auto img = cv::imread("../target.png");
 
-    std::cout << "rows: " << img.rows << " and cols " << img.cols << std::endl;
-    auto xRes = img.cols;
-    auto yRes = img.rows;
+    auto videoPath = "/home/nadav/Pictures/giphy.gif";
+    auto vid = cv::VideoCapture(videoPath);
+    if (!vid.isOpened()) {
+        std::cerr << "video '" << videoPath << "' not opened!" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    auto width = vid.get(cv::CAP_PROP_FRAME_WIDTH);
+    auto height = vid.get(cv::CAP_PROP_FRAME_HEIGHT);
+    auto fps = vid.get(cv::CAP_PROP_FPS);
+
+    std::cout << "Vid dimensions: " << width << "x" << height << std::endl;
+    auto xRes = width;
+    auto yRes = height;
     auto targetCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
-    const std::string targetWinName = "<= TARGET =>";
-    cv::namedWindow(targetWinName);
-    cv::imshow(targetWinName, img);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(30, xRes, yRes, 500);
+    auto population = std::make_shared<simplePopulation>(48, xRes, yRes, 300);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -37,7 +41,8 @@ int main() {
     population->getIndividuals()[0]->draw(canvas1);
     cv::imshow(firstItrWinName, canvas1);
 
-    auto generations = 500000000;
+    auto minGenerations = 1'000, maxGenerations = 5'000;
+    auto goodEnoughScore = 10;
     std::mutex mutex;
 
     auto bestPop = population;
@@ -81,23 +86,53 @@ int main() {
 
     statusThread.detach();
 
-    for (i = 0; i < generations; i++) {
-        population->sortByScore(img);
+    cv::Mat frame;
+    auto frame_idx = 0;
+    const std::string targetWinName = "<= TARGET =>";
+    cv::namedWindow(targetWinName);
 
-        if (population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
-            bestPop = population;
+    auto codec = cv::VideoWriter::fourcc('X', '2', '6', '4');
+    cv::VideoWriter output("../output.mp4", codec, fps, cv::Size(width, height));
+
+    if (!output.isOpened()) {
+        std::cout << "Could not open output file!" << std::endl;
+    }
+
+    while (true) {
+        vid >> frame;
+
+        if (frame.empty()) {
+            break;
         }
 
-        if (i % 100 == 0) {
-            std::cout << "Generation [" << i + 1 << " / " << generations << "] score is ["
-                      << population->getIndividuals().front()->getScore() << "],"
-                      << " and worst score is " << population->getIndividuals().back()->getScore()
-                      << ". best population had score of " << bestPop->getIndividuals().front()->getScore()
-                      << std::endl;
-        }
+        frame_idx++;
+        cv::imshow(targetWinName, frame);
+        std::cout << "Frame #" << frame_idx << ":\n";
+        for (i = 0; i < maxGenerations; i++) {
+            population->sortByScore(frame);
 
+            if (population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
+                bestPop = population;
+            }
+
+            if (i % 100 == 0) {
+                std::cout << "\tGeneration [" << i + 1 << " / " << maxGenerations << "] score is ["
+                          << population->getIndividuals().front()->getScore() << "],"
+                          << " and worst score is " << population->getIndividuals().back()->getScore()
+                          << ". best population had score of " << bestPop->getIndividuals().front()->getScore()
+                          << std::endl;
+            }
+
+            if (bestPop->getIndividuals().front()->getScore() < goodEnoughScore && i > minGenerations) {
+                break;
+            }
+
+            std::lock_guard<std::mutex> lock(mutex);
+            population = population->nextGeneration();
+        }
         std::lock_guard<std::mutex> lock(mutex);
-        population = population->nextGeneration();
+        bestPop->getIndividuals()[0]->draw(frame);
+        output.write(frame);
     }
 
 #ifdef __APPLE__
