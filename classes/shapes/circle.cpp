@@ -84,16 +84,17 @@ namespace vidga {
         auto finalChance = static_cast<int>(100.f / getNumberWithinRange(chance, 0.f, 100.f));
 
         auto shouldMutate = [&]() { return genRandom(0, finalChance) == 1; };
+        auto shouldMutateDoubleChance = [&]() { return genRandom(0, finalChance/2) == 1; };
 
         if (shouldMutate()) {
             radius = static_cast<ucoor_t>(genRandom(sizeMin, sizeMax));
         }
 
-        if (shouldMutate()) {
+        if (shouldMutateDoubleChance()) {
             center.x = static_cast<ucoor_t>(genRandom(0, xMax));
         }
 
-        if (shouldMutate()) {
+        if (shouldMutateDoubleChance()) {
             center.y = static_cast<ucoor_t>(genRandom(0, yMax));
         }
 

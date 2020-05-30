@@ -13,15 +13,15 @@ using namespace vidga;
 using namespace std::chrono_literals;
 
 int main() {
-    // Load and display target image
-//    auto img = cv::imread("../target.png");
-
     auto videoPath = "/home/nadav/Pictures/giphy.gif";
     auto vid = cv::VideoCapture(videoPath);
     if (!vid.isOpened()) {
         std::cerr << "video '" << videoPath << "' not opened!" << std::endl;
         return EXIT_FAILURE;
     }
+
+    auto minGenerations = 3'000, maxGenerations = 75'000;
+    auto goodEnoughScore = 13; // let it run until maxGenerations for now
 
     auto width = vid.get(cv::CAP_PROP_FRAME_WIDTH);
     auto height = vid.get(cv::CAP_PROP_FRAME_HEIGHT);
@@ -33,16 +33,11 @@ int main() {
     auto targetCanvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(48, xRes, yRes, 300);
+    auto population = std::make_shared<simplePopulation>(36, xRes, yRes, 450);
 
-    const std::string firstItrWinName = "first iter";
-    cv::namedWindow(firstItrWinName);
     auto canvas1 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
     population->getIndividuals()[0]->draw(canvas1);
-    cv::imshow(firstItrWinName, canvas1);
 
-    auto minGenerations = 1'000, maxGenerations = 5'000;
-    auto goodEnoughScore = 10;
     std::mutex mutex;
 
     auto bestPop = population;
@@ -75,9 +70,12 @@ int main() {
 #endif
 
     int i = 0, prevI = 0;
-
-    auto statusThread = std::thread([&i, &prevI]() {
-        while (true) {
+    auto exit = false;
+    auto statusThread = std::thread([&i, &prevI, &exit]() {
+        while (!exit) {
+            if (prevI > i) {
+                prevI = i;
+            }
             std::cout << "Speed: " << (i - prevI) / 5 << " Gen/s" << std::endl;
             prevI = i;
             std::this_thread::sleep_for(5s);
@@ -91,11 +89,16 @@ int main() {
     const std::string targetWinName = "<= TARGET =>";
     cv::namedWindow(targetWinName);
 
-    auto codec = cv::VideoWriter::fourcc('X', '2', '6', '4');
+    auto codec = cv::VideoWriter::fourcc('a', 'v', 'c', '1');
     cv::VideoWriter output("../output.mp4", codec, fps, cv::Size(width, height));
+    cv::VideoWriter outputBlurred("../output_blurred.mp4", codec, fps, cv::Size(width, height));
 
     if (!output.isOpened()) {
         std::cout << "Could not open output file!" << std::endl;
+    }
+
+    if (!outputBlurred.isOpened()) {
+        std::cout << "Could not open blurred output file!" << std::endl;
     }
 
     while (true) {
@@ -111,7 +114,7 @@ int main() {
         for (i = 0; i < maxGenerations; i++) {
             population->sortByScore(frame);
 
-            if (population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
+            if (i == 0 || population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
                 bestPop = population;
             }
 
@@ -133,7 +136,11 @@ int main() {
         std::lock_guard<std::mutex> lock(mutex);
         bestPop->getIndividuals()[0]->draw(frame);
         output.write(frame);
+        cv::blur(frame, frame, cv::Size{4, 4});
+        outputBlurred.write(frame);
     }
+
+    std::cout << "done writing " << frame_idx+1 << " video frames\n";
 
 #ifdef __APPLE__
     const std::string best = "best match";
@@ -145,7 +152,7 @@ int main() {
     auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
     bestPop->getIndividuals()[0]->draw(canvas);
     cv::imwrite("./best.png", canvas);
-    cv::waitKey();
-
+    exit = true;
+    statusThread.join();
     return 0;
 }
