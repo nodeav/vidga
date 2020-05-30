@@ -116,7 +116,7 @@ int main() {
     statusThread.detach();
 
     for (i = 0; i < generations; i++) {
-        cudaProfilerStart();
+//        cudaProfilerStart();
         population->sortByScore(imgGpu);
 
         if (population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
@@ -143,6 +143,6 @@ int main() {
     cv::imshow(best, canvas2);
 #endif
 //    cv::waitKey();
-    cudaProfilerStop();
+//    cudaProfilerStop();
     return 0;
 }

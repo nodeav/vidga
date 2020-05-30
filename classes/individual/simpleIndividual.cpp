@@ -91,24 +91,27 @@ if (e != cudaSuccess) { \
     }
 
     void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap) {
-        cv::Mat scratchPad(height, width, CV_32FC3);
+//        cv::Mat scratchPad(height, width, CV_32FC3);
         auto numSubpixels = width * height * 3;
 
         if (!targetCopied) {
             targetCPU = new float[numSubpixels]();
             canvasCPU = new float[numSubpixels]();
-            gpu_check(cudaMemcpy(targetCPU, target, numSubpixels*sizeof(float), cudaMemcpyDeviceToHost));
+            gpu_check(cudaMemcpy(targetCPU, target, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost));
             targetMat = cv::Mat(height, width, CV_32FC3, targetCPU);
             targetCopied = true;
         }
-        draw(canvas, circlesMap);
 
-        gpu_check(cudaMemcpy(canvasCPU, canvas, numSubpixels*sizeof(float), cudaMemcpyDeviceToHost));
+        cuda::calcDiffUsingMapHostFn(canvas, target, width, height, circlesMap, circles, minMapRadius);
+        cudaDeviceSynchronize();
+//        draw(canvas, circlesMap);
+
+        gpu_check(cudaMemcpy(canvasCPU, canvas, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost));
         canvasMat = cv::Mat(height, width, CV_32FC3, canvasCPU);
         gpu_check(cudaDeviceSynchronize());
 
-        cv::absdiff(targetMat, canvasMat, scratchPad);
-        cv::Scalar newScore = cv::sum(scratchPad);
+//        cv::absdiff(targetMat, canvasMat, scratchPad);
+        cv::Scalar newScore = cv::sum(canvasMat);
         score = static_cast<float>((newScore.val[0] + newScore.val[1] + newScore.val[2]) /
                                    (targetMat.total() * targetMat.channels()));
     }

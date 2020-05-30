@@ -13,6 +13,7 @@ namespace vidga {
         maxSideLen = static_cast<ucoor_t>(maxSizeFactor * avg);
 
         if (!skipCircleMapsInit) {
+            std::cout << "initializing circle map with min " << minSideLen << " and max " << maxSideLen << "\n";
             vidga::cuda::initCircleMaps(minSideLen, maxSideLen, &circlesMap);
         }
 
