@@ -90,7 +90,7 @@ if (e != cudaSuccess) { \
     printf("cuda error - %d on %s:%d\n", e, __FILE__, __LINE__); \
     }
 
-    void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float **circlesMap) {
+    void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float *circlesMap) {
 //        cv::Mat scratchPad(height, width, CV_32FC3);
         auto numSubpixels = width * height * 3;
 

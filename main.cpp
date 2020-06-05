@@ -54,7 +54,7 @@ int main() {
     auto canvas1Cpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasData1);
     cv::imshow(firstItrWinName, canvas1Cpu);
 
-    auto generations = 100;
+    auto generations = 500000;
     std::mutex mutex;
 
     auto bestPop = population;
@@ -116,7 +116,7 @@ int main() {
     statusThread.detach();
 
     for (i = 0; i < generations; i++) {
-//        cudaProfilerStart();
+        cudaProfilerStart();
         population->sortByScore(imgGpu);
 
         if (population->getIndividuals().front()->getScore() < bestPop->getIndividuals().front()->getScore()) {
@@ -142,7 +142,7 @@ int main() {
     population->getIndividuals()[0]->draw(canvas2);
     cv::imshow(best, canvas2);
 #endif
-//    cv::waitKey();
-//    cudaProfilerStop();
+    cv::waitKey();
+    cudaProfilerStop();
     return 0;
 }

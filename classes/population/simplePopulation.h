@@ -38,7 +38,8 @@ namespace vidga {
 
         void addIndividual(const std::shared_ptr<simpleIndividual> &individual);
 
-        float **circlesMap;
+        float **draw_map;
+        float *diff_map;
     };
 }
 

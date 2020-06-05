@@ -14,7 +14,8 @@ namespace vidga {
 
         if (!skipCircleMapsInit) {
             std::cout << "initializing circle map with min " << minSideLen << " and max " << maxSideLen << "\n";
-            vidga::cuda::initCircleMaps(minSideLen, maxSideLen, &circlesMap);
+            vidga::cuda::initCircleMaps(minSideLen, maxSideLen, &draw_map);
+            vidga::cuda::initCircleMaps1D(minSideLen, maxSideLen, &diff_map);
         }
 
         individualSize = individualSize_;
@@ -39,7 +40,7 @@ namespace vidga {
         for (auto i = 0; i < individuals.size(); i++) {
             futures[i] = threadPool->enqueue([&](int i) {
                 thread_local auto canvas = cuda::getWhiteGpuMat(imgResX, imgResY);
-                individuals[i]->calcAndSetScore(target, canvas, circlesMap);
+                individuals[i]->calcAndSetScore(target, canvas, diff_map);
                 cuda::setGpuMatTo(canvas, imgResX, imgResY, 0.f);
             }, i);
         }
@@ -57,7 +58,8 @@ namespace vidga {
         auto topIndividualsCutoff = static_cast<int>(individuals.size() * 0.2);
         auto result = std::make_shared<simplePopulation>(0, imgResX, imgResY, individualSize);
         result->threadPool = std::move(threadPool);
-        result->circlesMap = circlesMap;
+        result->draw_map = draw_map;
+        result->diff_map = diff_map;
         auto getRandomIndex = [&]() {
             return genRandom(0, topIndividualsCutoff);
         };
@@ -79,7 +81,7 @@ namespace vidga {
     }
 
     void simplePopulation::drawBest(float3 *canvas) const {
-        individuals[0]->draw(canvas, circlesMap);
+        individuals[0]->draw(canvas, draw_map);
     }
 
 }
