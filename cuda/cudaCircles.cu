@@ -124,7 +124,7 @@ namespace vidga {
             const unsigned int strideY = blockDim.y * gridDim.y;
             const unsigned int posX = blockIdx.x * blockDim.x + threadIdx.x;
             const unsigned int posY = blockIdx.y * blockDim.y + threadIdx.y;
-            auto from = getOffsetByRadius(mapOffset);
+            auto from = getOffsetByRadius(mapOffset - 1);
             for (unsigned col = posY; col < height; col += strideY) {
                 for (unsigned row = posX; row < width; row += strideX) {
                     auto idx = colRow2idx(col, row, width);
@@ -133,10 +133,11 @@ namespace vidga {
                     for (unsigned i = 0; i < nCircles; i++) {
                         const auto &circle = circles[i];
                         if (isInCircleBBox(circle, row, col)) {
-                            auto to = getOffsetByRadius(circle.radius);
-                            /*printf("pixel {%d, %d} is in circle{r:%d, c{%d, %d}}. using map #%d\n",
-                                   col, row, circle.radius, circle.center.x, circle.center.y, circle.radius - mapOffset);*/
-                            drawCirclePixelUsingMap(pixel, map + to - from - 1, circle, row, col);
+                            auto to = getOffsetByRadius(circle.radius - 1);
+                            /*printf("pixel {%d, %d} is in circle{r:%d, c{%d, %d}}. using map #%d with offset %d, to %d, from %d\n",
+                                   col, row, circle.radius, circle.center.x, circle.center.y,
+                                   circle.radius - mapOffset, to - from, to, from);*/
+                            drawCirclePixelUsingMap(pixel, map + to - from, circle, row, col);
                         }
                     }
                     pixel->x = abs(pixel->x - target->x);
@@ -190,18 +191,19 @@ namespace vidga {
         }
 
         void initCircleMaps1D(unsigned minRadius, unsigned maxRadius, float **gpuBuffers) {
-            size_t sz = 0;
+            size_t nElems = 0;
             for (auto i = minRadius; i <= maxRadius; i++) {
                 auto d = 2 * i + 1;
-//                printf("initCircleMaps1D: allocating %d more bytes for i %d\n", d * d, i);
-                sz += d * d;
+//                printf("initCircleMaps1D: allocating %d more elements for i %d\n", d * d, i);
+                nElems += d * d;
             }
-            cudaMalloc(gpuBuffers, sz * sizeof(float));
+            cudaMalloc(gpuBuffers, nElems * sizeof(float));
 
             auto offset = 0;
             for (auto i = minRadius; i <= maxRadius; i++) {
                 auto winSideLength = 2 * i + 1;
                 auto winPixels = winSideLength * winSideLength;
+//                printf("using offset: %d\n", offset);
                 genSmoothCircleMap<<<32, 32>>>((*gpuBuffers) + offset, i);
                 offset += winPixels;
             }
@@ -209,7 +211,7 @@ namespace vidga {
         }
 
 
-        void setGpuMatTo(float3 *mat, unsigned width, unsigned height, float val) {
+        void setGpuMatTo(float3 *mat, unsigned width, unsigned height, int val) {
             auto size = width * height * sizeof(float) * 3;
             cudaMemset(mat, val, size);
         }
@@ -218,7 +220,7 @@ namespace vidga {
             auto size = width * height * sizeof(float) * 3;
             float3 *ret;
             gpu_check(cudaMalloc(&ret, size));
-            setGpuMatTo(ret, width, height, 0.f);
+            setGpuMatTo(ret, width, height, 0);
             return ret;
         }
     }

@@ -95,6 +95,7 @@ if (e != cudaSuccess) { \
         auto numSubpixels = width * height * 3;
 
         if (!targetCopied) {
+//            cv::namedWindow("temp");
             targetCPU = new float[numSubpixels]();
             canvasCPU = new float[numSubpixels]();
             gpu_check(cudaMemcpy(targetCPU, target, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost));
@@ -109,6 +110,9 @@ if (e != cudaSuccess) { \
         gpu_check(cudaMemcpy(canvasCPU, canvas, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost));
         canvasMat = cv::Mat(height, width, CV_32FC3, canvasCPU);
         gpu_check(cudaDeviceSynchronize());
+
+//        cv::imshow("temp", canvasMat);
+//        cv::waitKey(0);
 
 //        cv::absdiff(targetMat, canvasMat, scratchPad);
         cv::Scalar newScore = cv::sum(canvasMat);

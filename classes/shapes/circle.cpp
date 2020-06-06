@@ -50,7 +50,7 @@ namespace vidga {
                 genRandom(0.f, 1.f),
                 genRandom(0.f, 1.f),
                 genRandom(0.f, 1.f),
-                genRandom(0.f, 1.f)
+                genRandom(0.f, 0.7f)
         };
     }
 
@@ -99,7 +99,7 @@ namespace vidga {
         }
 
         if (shouldMutate()) {
-            color.w = genRandom(0, 1);
+            color.w = genRandom(0, 0.7);
         }
     }
 //

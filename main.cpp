@@ -41,7 +41,7 @@ int main() {
     cudaMemcpy(imgGpu, imgForGpu.data, numSubpixels * sizeof(float), cudaMemcpyHostToDevice);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(40, xRes, yRes, 250, false);
+    auto population = std::make_shared<simplePopulation>(24, xRes, yRes, 150, false);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -64,6 +64,8 @@ int main() {
         cv::namedWindow(current);
         const std::string best = "best";
         cv::namedWindow(best);
+        const std::string diff = "diff";
+        cv::namedWindow(diff);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma ide diagnostic ignored "EndlessLoop"
@@ -73,28 +75,30 @@ int main() {
             auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
             auto canvas2 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
 
-            cv::Mat canvasBestCpu, canvasCurrCpu;
+            cv::Mat canvasBestCpu, canvasCurrCpu, canvasBestDiff;
             {
                 std::lock_guard<std::mutex> lock(mutex);
 
-                cuda::setGpuMatTo(canvasBestGpu, xRes, yRes, 1.f);
+                cuda::setGpuMatTo(canvasBestGpu, xRes, yRes, 0x00);
                 bestPop->drawBest(canvasBestGpu);
                 auto cpuCanvasDataBest = new float[numSubpixels]();
                 cudaDeviceSynchronize();
                 cudaMemcpy(cpuCanvasDataBest, canvasBestGpu, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
                 canvasBestCpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasDataBest);
 
-                cuda::setGpuMatTo(canvasCurrGpu, xRes, yRes, 1.f);
+                cuda::setGpuMatTo(canvasCurrGpu, xRes, yRes, 0x00);
                 population->drawBest(canvasCurrGpu);
                 auto cpuCanvasDataCurr = new float[numSubpixels]();
                 cudaDeviceSynchronize();
                 cudaMemcpy(cpuCanvasDataCurr, canvasCurrGpu, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost);
                 canvasCurrCpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasDataCurr);
 
+                cv::absdiff(canvasCurrCpu, imgForGpu, canvasBestDiff);
             }
 
             cv::imshow(best, canvasBestCpu);
             cv::imshow(current, canvasCurrCpu);
+            cv::imshow(diff, canvasBestDiff);
             cv::waitKey(5000);
         }
 #pragma clang diagnostic pop

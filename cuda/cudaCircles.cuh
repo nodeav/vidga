@@ -10,7 +10,7 @@ namespace vidga {
         drawManyUsingMapHostFn(float3 *buffer, unsigned width, unsigned height, float **maps, unsigned mapsOffset,
                                const circle *circles, unsigned nCircles);
 */
-        void setGpuMatTo(float3 *mat, unsigned width, unsigned height, float val);
+        void setGpuMatTo(float3 *mat, unsigned width, unsigned height, int val);
 
         float3 *getWhiteGpuMat(unsigned width, unsigned height);
 
