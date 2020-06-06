@@ -20,8 +20,8 @@ int main() {
     cv::waitKey(0);
     // Load and display target image
 //     auto img = cv::imread("/home/nadav/Downloads/photo6003684971056836606.jpg");
-    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
-//    auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
+//    auto img = cv::imread("/home/nadav/Documents/GeneticAlgorithm/mona.png");
+    auto img = cv::imread("/home/nadav/Pictures/pc-principle.jpg");
 //    auto img = cv::imread("/home/nadav/Pictures/vlcsnap-2020-03-27-00h45m02s240.png"); // 4K!!
 //    auto img = cv::imread("/home/nadav/Pictures/ratatouille.640x268.2.png");
 
@@ -41,7 +41,7 @@ int main() {
     cudaMemcpy(imgGpu, imgForGpu.data, numSubpixels * sizeof(float), cudaMemcpyHostToDevice);
 
     // Create initial population
-    auto population = std::make_shared<simplePopulation>(24, xRes, yRes, 150, false);
+    auto population = std::make_shared<simplePopulation>(24, xRes, yRes, 350, false);
 
     const std::string firstItrWinName = "first iter";
     cv::namedWindow(firstItrWinName);
@@ -54,7 +54,7 @@ int main() {
     auto canvas1Cpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasData1);
     cv::imshow(firstItrWinName, canvas1Cpu);
 
-    auto generations = 2500;
+    auto generations = 500;
     std::mutex mutex;
 
     auto bestPop = population;

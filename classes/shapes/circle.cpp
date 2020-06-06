@@ -35,7 +35,7 @@ namespace vidga {
     }
 
     circle::circle(coors center_, ucoor_t radius_)
-            : shape(center_), radius(radius_) {
+            : center(center_), radius(radius_) {
     }
 
     circle::circle(ucoor_t radius_) : circle({0, 0}, radius_) {

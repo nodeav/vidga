@@ -9,24 +9,24 @@
 #include "../../interfaces/shape/shape.h"
 
 namespace vidga {
-    class circle : public shape {
+    class circle {
     public:
         circle();
         circle(coors center_, ucoor_t radius_);
         explicit circle(ucoor_t radius_);
-        void mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMin, ucoor_t sizeMax) override;
+        void mutate(float chance, ucoor_t xMax, ucoor_t yMax, ucoor_t sizeMin, ucoor_t sizeMax);
 //        circle& operator=(const circle &rhs) noexcept;
 
-        bool contains(coors c) const override;
-        ucoor_t getWidth() const override;
-        ucoor_t getHeight() const override;
-        coors getCenter() const override;
-        bgr_color_t getColor() const override;
+        bool contains(coors c) const;
+        ucoor_t getWidth() const;
+        ucoor_t getHeight() const;
+        coors getCenter() const;
+        bgr_color_t getColor() const;
 
-        void setWidth(ucoor_t newWidth) override;
-        void setHeight(ucoor_t newHeight) override;
-        void setColor(bgr_color_t newColor) override;
-        void setRandomEverything(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) override;
+        void setWidth(ucoor_t newWidth);
+        void setHeight(ucoor_t newHeight);
+        void setColor(bgr_color_t newColor);
+        void setRandomEverything(ucoor_t sideLengthMin, ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
 
 //    private:
         coors center;

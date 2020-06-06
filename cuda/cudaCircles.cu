@@ -24,9 +24,10 @@ namespace vidga {
             pixel->z = min(color.z * circleModifier + pixel->z * canvasModifier, 1.f);
         }
 
-        __device__ __always_inline void blendColorsNoCutoff(float3 *pixel, float4 color, float modifier) {
+        __device__ void blendColorsNoCutoff(float3 *pixel, float4 color, float modifier) {
             float circleModifier = color.w * modifier;
             float canvasModifier = 1 - circleModifier;
+//            printf("pixel is %p and color is %f, %f, %f, %f\n", pixel, color.x, color.y, color.z, color.w);
             pixel->x = color.x * circleModifier + pixel->x * canvasModifier;
             pixel->y = color.y * circleModifier + pixel->y * canvasModifier;
             pixel->z = color.z * circleModifier + pixel->z * canvasModifier;
@@ -83,21 +84,24 @@ namespace vidga {
             unsigned right = min(width - 1, c.center.x + c.radius);
             unsigned bottom = min(height - 1, c.center.y + c.radius);
 
-            for (unsigned col = top + posY; col <= bottom; col += strideY) {
-                for (unsigned row = left + posX; row <= right; row += strideX) {
+            for (unsigned row = top + posY; row <= bottom; row += strideY) {
+                for (unsigned col = left + posX; col <= right; col += strideX) {
                     unsigned bufferIdx = colRow2idx(col, row, width);
                     float3 *pixel = &buffer[bufferIdx];
 
-                    unsigned mapIdx = colRow2idx(col - top + mapShiftY, row - left + mapShiftX, c.radius * 2 + 1);
+                    unsigned mapIdx = colRow2idx(col - left + mapShiftX, row - top + mapShiftY, c.radius * 2 + 1);
                     float modifier = map[mapIdx];
                     blendColorsNoCutoff(pixel, c.color, modifier);
                 }
             }
         }
 
-        __always_inline __device__ bool isInCircleBBox(const circle &c, unsigned x, unsigned y) {
-            auto inX = c.center.x + c.radius >= x && c.center.x - c.radius <= x;
-            auto inY = c.center.y + c.radius >= y && c.center.y - c.radius <= y;
+        __always_inline __device__ bool isInCircleBBox(const circle &c, int x, int y) {
+            int centerX = static_cast<int>(c.center.x);
+            int centerY = static_cast<int>(c.center.y);
+            int radSigned = static_cast<int>(c.radius);
+            auto inX = centerX + radSigned >= x && centerX - radSigned <= x;
+            auto inY = centerY + radSigned >= y && centerY - radSigned <= y;
             return inX && inY;
         }
 
@@ -124,25 +128,35 @@ namespace vidga {
             const unsigned int strideY = blockDim.y * gridDim.y;
             const unsigned int posX = blockIdx.x * blockDim.x + threadIdx.x;
             const unsigned int posY = blockIdx.y * blockDim.y + threadIdx.y;
+            extern __shared__ circle sh_circles[];
+
+            if (threadIdx.y == 0) {
+                for (auto i = threadIdx.x; i < nCircles; i += blockDim.x) {
+                    sh_circles[i] = circles[i];
+                }
+            }
+
+            __syncthreads();
+
             auto from = getOffsetByRadius(mapOffset - 1);
-            for (unsigned col = posY; col < height; col += strideY) {
-                for (unsigned row = posX; row < width; row += strideX) {
+            for (unsigned row = posY; row < height; row += strideY) {
+                for (unsigned col = posX; col < width; col += strideX) {
                     auto idx = colRow2idx(col, row, width);
                     float3 pixel = {0.f, 0.f, 0.f};
-                    auto *target = &orig[idx];
                     for (unsigned i = 0; i < nCircles; i++) {
-                        const auto &circle = circles[i];
-                        if (isInCircleBBox(circle, row, col)) {
+                        const auto &circle = sh_circles[i];
+                        if (isInCircleBBox(circle, static_cast<int>(col), static_cast<int>(row))) {
                             auto to = getOffsetByRadius(circle.radius - 1);
                             /*printf("pixel {%d, %d} is in circle{r:%d, c{%d, %d}}. using map #%d with offset %d, to %d, from %d\n",
                                    col, row, circle.radius, circle.center.x, circle.center.y,
                                    circle.radius - mapOffset, to - from, to, from);*/
-                            drawCirclePixelUsingMap(&pixel, map + to - from, circle, row, col);
+                            drawCirclePixelUsingMap(&pixel, map + to - from, circle, col, row);
                         }
                     }
-                    pixel.x = abs(pixel.x - target->x);
-                    pixel.y = abs(pixel.y - target->y);
-                    pixel.z = abs(pixel.z - target->z);
+                    auto target = orig[idx];
+                    pixel.x = abs(pixel.x - target.x);
+                    pixel.y = abs(pixel.y - target.y);
+                    pixel.z = abs(pixel.z - target.z);
                     buffer[idx] = pixel;
                 }
             }
@@ -161,7 +175,7 @@ namespace vidga {
         void
         calcDiffUsingMapHostFn(float3 *buffer, float3 *orig, unsigned width, unsigned height, float *map,
                                const std::vector<circle> &circles, unsigned mapOffset, cudaStream_t cudaStream) {
-            dim3 threads(16, 16, 1);
+            dim3 threads(8, 8, 1);
             dim3 blocks(16, 16, 1);
 
             circle *d_circles;
@@ -170,9 +184,10 @@ namespace vidga {
             gpu_check(cudaMalloc(&d_circles, circSize));
             gpu_check(cudaMemcpyAsync(d_circles, circles.data(), circSize, cudaMemcpyHostToDevice, cudaStream));
 
-            calcDiffUsingMap<<<blocks, threads, 0, cudaStream>>>(buffer, orig, width, height, map, d_circles,
-                                                                 circles.size(),
-                                                                 mapOffset);
+            calcDiffUsingMap<<<blocks, threads, circSize, cudaStream>>>(buffer, orig, width, height, map,
+                                                                        d_circles,
+                                                                        circles.size(),
+                                                                        mapOffset);
 
             cudaFree(d_circles);
         }
