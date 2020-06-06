@@ -15,7 +15,7 @@ namespace vidga {
         float3 *getWhiteGpuMat(unsigned width, unsigned height);
 
         void calcDiffUsingMapHostFn(float3 *buffer, float3 *orig, unsigned width, unsigned height, float *map,
-                                    const std::vector<circle> &circles, unsigned mapOffset);
+                                    const std::vector<circle> &circles, unsigned mapOffset, cudaStream_t cudaStream);
 
         class cudaCircles {
         private:

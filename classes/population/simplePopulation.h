@@ -8,6 +8,7 @@
 #include <cmath>
 #include <vector>
 #include <thread>
+#include <map>
 #include "../individual/simpleIndividual.h"
 #include "util.h"
 
@@ -40,6 +41,7 @@ namespace vidga {
 
         float **draw_map;
         float *diff_map;
+        std::map<std::thread::id, cudaStream_t> cudaStreams;
     };
 }
 

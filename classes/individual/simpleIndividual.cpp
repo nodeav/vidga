@@ -90,7 +90,7 @@ if (e != cudaSuccess) { \
     printf("cuda error - %d on %s:%d\n", e, __FILE__, __LINE__); \
     }
 
-    void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float *circlesMap) {
+    void simpleIndividual::calcAndSetScore(float3 *target, float3 *canvas, float *circlesMap, cudaStream_t cudaStream) {
 //        cv::Mat scratchPad(height, width, CV_32FC3);
         auto numSubpixels = width * height * 3;
 
@@ -98,18 +98,18 @@ if (e != cudaSuccess) { \
 //            cv::namedWindow("temp");
             targetCPU = new float[numSubpixels]();
             canvasCPU = new float[numSubpixels]();
-            gpu_check(cudaMemcpy(targetCPU, target, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost));
+            cudaMemcpyAsync(targetCPU, target, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost, cudaStream);
             targetMat = cv::Mat(height, width, CV_32FC3, targetCPU);
             targetCopied = true;
         }
 
-        cuda::calcDiffUsingMapHostFn(canvas, target, width, height, circlesMap, circles, minMapRadius);
-        cudaDeviceSynchronize();
+        cuda::calcDiffUsingMapHostFn(canvas, target, width, height, circlesMap, circles, minMapRadius, cudaStream);
+        gpu_check(cudaStreamSynchronize(cudaStream));
 //        draw(canvas, circlesMap);
 
-        gpu_check(cudaMemcpy(canvasCPU, canvas, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost));
+        cudaMemcpyAsync(canvasCPU, canvas, numSubpixels * sizeof(float), cudaMemcpyDeviceToHost, cudaStream);
         canvasMat = cv::Mat(height, width, CV_32FC3, canvasCPU);
-        gpu_check(cudaDeviceSynchronize());
+        gpu_check(cudaStreamSynchronize(cudaStream));
 
 //        cv::imshow("temp", canvasMat);
 //        cv::waitKey(0);

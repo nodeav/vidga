@@ -40,7 +40,16 @@ namespace vidga {
         for (auto i = 0; i < individuals.size(); i++) {
             futures[i] = threadPool->enqueue([&](int i) {
                 thread_local auto canvas = cuda::getWhiteGpuMat(imgResX, imgResY);
-                individuals[i]->calcAndSetScore(target, canvas, diff_map);
+                cudaStream_t stream;
+                auto tid = std::this_thread::get_id();
+                auto cudaStream = cudaStreams.find(tid);
+                if (cudaStream == cudaStreams.end()) {
+                    cudaStreamCreate(&stream);
+                    cudaStreams.insert({tid, stream});
+                } else {
+                    stream = cudaStream->second;
+                }
+                individuals[i]->calcAndSetScore(target, canvas, diff_map, stream);
                 cuda::setGpuMatTo(canvas, imgResX, imgResY, 0.f);
             }, i);
         }
@@ -60,6 +69,7 @@ namespace vidga {
         result->threadPool = std::move(threadPool);
         result->draw_map = draw_map;
         result->diff_map = diff_map;
+        result->cudaStreams = cudaStreams;
         auto getRandomIndex = [&]() {
             return genRandom(0, topIndividualsCutoff);
         };

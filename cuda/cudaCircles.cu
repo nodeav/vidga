@@ -90,7 +90,7 @@ namespace vidga {
 
                     unsigned mapIdx = colRow2idx(col - top + mapShiftY, row - left + mapShiftX, c.radius * 2 + 1);
                     float modifier = map[mapIdx];
-                    blendColors(pixel, c.color, modifier);
+                    blendColorsNoCutoff(pixel, c.color, modifier);
                 }
             }
         }
@@ -128,7 +128,7 @@ namespace vidga {
             for (unsigned col = posY; col < height; col += strideY) {
                 for (unsigned row = posX; row < width; row += strideX) {
                     auto idx = colRow2idx(col, row, width);
-                    auto *pixel = &buffer[idx];
+                    float3 pixel = {0.f, 0.f, 0.f};
                     auto *target = &orig[idx];
                     for (unsigned i = 0; i < nCircles; i++) {
                         const auto &circle = circles[i];
@@ -137,12 +137,13 @@ namespace vidga {
                             /*printf("pixel {%d, %d} is in circle{r:%d, c{%d, %d}}. using map #%d with offset %d, to %d, from %d\n",
                                    col, row, circle.radius, circle.center.x, circle.center.y,
                                    circle.radius - mapOffset, to - from, to, from);*/
-                            drawCirclePixelUsingMap(pixel, map + to - from, circle, row, col);
+                            drawCirclePixelUsingMap(&pixel, map + to - from, circle, row, col);
                         }
                     }
-                    pixel->x = abs(pixel->x - target->x);
-                    pixel->y = abs(pixel->y - target->y);
-                    pixel->z = abs(pixel->z - target->z);
+                    pixel.x = abs(pixel.x - target->x);
+                    pixel.y = abs(pixel.y - target->y);
+                    pixel.z = abs(pixel.z - target->z);
+                    buffer[idx] = pixel;
                 }
             }
 
@@ -159,7 +160,7 @@ namespace vidga {
 
         void
         calcDiffUsingMapHostFn(float3 *buffer, float3 *orig, unsigned width, unsigned height, float *map,
-                               const std::vector<circle> &circles, unsigned mapOffset) {
+                               const std::vector<circle> &circles, unsigned mapOffset, cudaStream_t cudaStream) {
             dim3 threads(16, 16, 1);
             dim3 blocks(16, 16, 1);
 
@@ -167,10 +168,11 @@ namespace vidga {
             auto circSize = circles.size() * sizeof(circles[0]);
 //            printf("using %zu circles, each of size %lu\n", circles.size(), sizeof(circles[0]));
             gpu_check(cudaMalloc(&d_circles, circSize));
-            gpu_check(cudaMemcpy(d_circles, circles.data(), circSize, cudaMemcpyHostToDevice));
+            gpu_check(cudaMemcpyAsync(d_circles, circles.data(), circSize, cudaMemcpyHostToDevice, cudaStream));
 
-            calcDiffUsingMap<<<blocks, threads>>>(buffer, orig, width, height, map, d_circles, circles.size(),
-                                                  mapOffset);
+            calcDiffUsingMap<<<blocks, threads, 0, cudaStream>>>(buffer, orig, width, height, map, d_circles,
+                                                                 circles.size(),
+                                                                 mapOffset);
 
             cudaFree(d_circles);
         }

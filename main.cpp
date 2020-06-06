@@ -54,10 +54,11 @@ int main() {
     auto canvas1Cpu = cv::Mat(yRes, xRes, CV_32FC3, cpuCanvasData1);
     cv::imshow(firstItrWinName, canvas1Cpu);
 
-    auto generations = 500000;
+    auto generations = 2500;
     std::mutex mutex;
 
     auto bestPop = population;
+    volatile bool threadsActive = true;
 #ifndef __APPLE__
     auto drawThread = std::thread([&]() {
         const std::string current = "current";
@@ -71,7 +72,7 @@ int main() {
 #pragma ide diagnostic ignored "EndlessLoop"
         auto canvasBestGpu = cuda::getWhiteGpuMat(xRes, yRes);
         auto canvasCurrGpu = cuda::getWhiteGpuMat(xRes, yRes);
-        while (true) {
+        while (threadsActive) {
             auto canvas = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
             auto canvas2 = cv::Mat(yRes, xRes, CV_8UC3, cv::Scalar(255, 255, 255));
 
@@ -109,8 +110,8 @@ int main() {
 
     int i = 0, prevI = 0;
 
-    auto statusThread = std::thread([&i, &prevI]() {
-        while (true) {
+    auto statusThread = std::thread([&i, &prevI, &threadsActive]() {
+        while (threadsActive) {
             std::cout << "Speed: " << (i - prevI) / 5 << " Gen/s" << std::endl;
             prevI = i;
             std::this_thread::sleep_for(5s);
@@ -146,7 +147,14 @@ int main() {
     population->getIndividuals()[0]->draw(canvas2);
     cv::imshow(best, canvas2);
 #endif
-    cv::waitKey();
+//    cv::waitKey();
     cudaProfilerStop();
+    threadsActive = false;
+    if (drawThread.joinable()) {
+        drawThread.join();
+    }
+    if (statusThread.joinable()) {
+        statusThread.join();
+    }
     return 0;
 }
