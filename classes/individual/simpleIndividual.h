@@ -30,7 +30,7 @@ namespace vidga {
 
         void draw(float3 *canvas, float **map) const;
 
-        std::shared_ptr<simpleIndividual> randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
+        std::shared_ptr<simpleIndividual> randMerge(const std::shared_ptr<simpleIndividual>& src, ucoor_t sideLengthMin,
                                                     ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax);
 
         void calcAndSetScore(float3 *target, float3 *canvas, float *circlesMap, cudaStream_t cudaStream);

@@ -43,7 +43,7 @@ namespace vidga {
     }
 
     std::shared_ptr<simpleIndividual>
-    simpleIndividual::randMerge(std::shared_ptr<simpleIndividual> src, ucoor_t sideLengthMin,
+    simpleIndividual::randMerge(const std::shared_ptr<simpleIndividual>& src, ucoor_t sideLengthMin,
                                 ucoor_t sideLengthMax, ucoor_t xMax, ucoor_t yMax) {
         auto dst = std::make_shared<simpleIndividual>(circles.size(), sideLengthMin, sideLengthMax, xMax, yMax);
 
@@ -73,9 +73,9 @@ namespace vidga {
                     cir = circles[idx];
                 }
                 dstShapes[idx] = cir;
-                dstShapes[idx].mutate(0.5, xMax, yMax, sideLengthMin, sideLengthMax);
+                dstShapes[idx].mutate(0.1, xMax, yMax, sideLengthMin, sideLengthMax);
 
-                if (genRandom(0, 50) < 1) {
+                if (genRandom(0, 500) < 1) {
                     auto idx1 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
                     auto idx2 = genRandom(0, static_cast<int>(dstShapes.size() - 1));
                     std::iter_swap(dstShapes.begin() + idx1, dstShapes.begin() + idx2);
